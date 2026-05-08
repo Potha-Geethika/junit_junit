@@ -1,0 +1,60 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+carbo:
+  fracproop:
+    service:
+      baseUrl: https://ops-ak8-test.fracpro.ai/api/
+spring:
+  data:
+    mongodb:
+      uri: "mongodb://128.203.236.208:27017/FracProOps?directConnection=true"
+      database: FracProOps
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://prodlinqx.b2clogin.com/ac169be0-16a7-4fe4-9033-dba639b5eb1a/v2.0/
+          jwk-set-uri: https://prodlinqx.b2clogin.com/prodlinqx.onmicrosoft.com/B2C_1_PROD/discovery/v2.0/keys
+  cloud:
+    config:
+      enabled: false
+    stream:
+      bindings:
+        output:
+          destination:  orgChangeTopic
+          content-type: application/json
+      kafka:
+        binder:
+          zkNodes: kafkaserver
+          brokers: kafkaserver
+server:
+  port: 8098
+  shutdown: graceful
+
+security:
+  oauth2:
+    resource:
+      userInfoUri: https://ops-ak8-test.fracpro.ai/api/auth/auth/user
+
+#Setting the logging levels for the service
+logging:
+  level:
+    com.netflix: WARN
+    org.springframework.web: WARN
+    com.carbo: DEBUG
+
+
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    config-url: /api/activitylog/v3/api-docs/swagger-config
+    url: /api/activitylog/v3/api-docs/activitylog-service-api

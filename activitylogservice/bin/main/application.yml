@@ -1,0 +1,27 @@
+spring:
+  cloud:
+    stream:
+      bindings:
+        output:
+          destination:  orgChangeTopic
+          content-type: application/json
+      kafka:
+        binder:
+          zkNodes: kafkaserver
+          brokers: kafkaserver
+
+server:
+  port: 8098
+  shutdown: graceful
+
+security:
+  oauth2:
+    resource:
+      userInfoUri: ${AUTHSERVER_URI}
+
+#Setting the logging levels for the service
+logging:
+  level:
+    com.netflix: WARN
+    org.springframework.web: WARN
+    com.carbo: DEBUG

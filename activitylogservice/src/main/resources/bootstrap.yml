@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: activitylogservice
+#  profiles:
+#    active:
+#      default
+  cloud:
+    config:
+      enabled: false
