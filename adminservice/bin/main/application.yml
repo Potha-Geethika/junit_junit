@@ -1,0 +1,83 @@
+carbo.fracproop.service.baseurl: https://ops.fracpro.ai/api/
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://prodlinqx.b2clogin.com/ac169be0-16a7-4fe4-9033-dba639b5eb1a/v2.0/
+          jwk-set-uri: https://prodlinqx.b2clogin.com/prodlinqx.onmicrosoft.com/B2C_1_PROD/discovery/v2.0/keys
+  kafka:
+    bootstrap-servers: 172.16.193.5:9092
+    producer:
+      bootstrap-servers: 172.16.193.5:9092
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+    consumer:
+      enable-offset-reset: true
+      auto_offset_reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: console-consumer
+    listener:
+      missing-topics-fatal: false
+    debug: true
+    properties:
+      spring.json.use.type.headers: false
+  cloud:
+    config:
+      enabled: false
+    stream:
+      bindings:
+        output:
+          destination: AzureUserOps
+          content-type: application/json
+      kafka:
+        binder:
+          zkNodes: kafkaserver
+          brokers: kafkaserver
+
+  data:
+    mongodb:
+      auto-index-creation: false
+      uri: "mongodb://xops_users:xops%40RW123@172.168.141.33:27017/FracProOps?authSource=FracProOps&readPreference=primary&directConnection=true"
+      database: FracProOps
+
+
+server:
+  port: 8092
+  shutdown: graceful
+
+security:
+  oauth2:
+    resource:
+      userInfoUri: https://ops-ak8-test.fracpro.ai/api/auth/auth/user
+
+#Setting the logging levels for the service
+logging:
+  level:
+    com.netflix: WARN
+    org.springframework.web: WARN
+    com.carbo: DEBUG
+    org.springframework.web.client.RestTemplate: DEBUG
+
+#Setting the azure AD secrets for the service
+user:
+  azure-ad:
+    clientId: 8a35f445-4458-4221-987a-8480884362ab
+    clientSecret: ${AZURE_CLIENT_SECRET}
+    tenantId: 5b66cf02-7239-4896-b09d-1403bf8bd470
+    scopes: 'https://graph.microsoft.com/.default'
+    domain: 'preprodlinqx.onmicrosoft.com'
+  kafka:
+    groupId: console-consumer
+    consumer:
+      opsUserTopic: AzureUserOpsStaging
+    producer:
+      aiUserTopic: AzureUserAIStaging
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    config-url: /api/admin/v3/api-docs/swagger-config
+    url: /api/admin/v3/api-docs/all-service-api
