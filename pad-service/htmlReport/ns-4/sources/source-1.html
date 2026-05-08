@@ -1,0 +1,175 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PadChangeModel</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.carbo.pad.events.model</a>
+</div>
+
+<h1>Coverage Summary for Class: PadChangeModel (com.carbo.pad.events.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PadChangeModel</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.carbo.pad.events.model;
+&nbsp;
+&nbsp;import com.carbo.pad.model.Pad;
+&nbsp;
+&nbsp;public class PadChangeModel {
+&nbsp;    private String type;
+&nbsp;    private String action;
+&nbsp;    private String organizationId;
+&nbsp;    private String padName;
+&nbsp;    private String updatedTimezone;
+&nbsp;    private String previousTimezone;
+&nbsp;
+&nbsp;    public PadChangeModel(String type, String action, Pad updatedPad, String previousTimezone) {
+<b class="nc">&nbsp;        super();</b>
+<b class="nc">&nbsp;        this.type = type;</b>
+<b class="nc">&nbsp;        this.action = action;</b>
+<b class="nc">&nbsp;        this.organizationId = updatedPad.getOrganizationId();</b>
+<b class="nc">&nbsp;        this.padName = updatedPad.getName();</b>
+<b class="nc">&nbsp;        this.updatedTimezone = updatedPad.getTimezone();</b>
+<b class="nc">&nbsp;        this.previousTimezone = previousTimezone;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getType() {
+<b class="nc">&nbsp;        return type;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setType(String type) {
+<b class="nc">&nbsp;        this.type = type;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getAction() {
+<b class="nc">&nbsp;        return action;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setAction(String action) {
+<b class="nc">&nbsp;        this.action = action;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public String getOrganizationId() {
+<b class="nc">&nbsp;        return organizationId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setOrganizationId(String organizationId) {
+<b class="nc">&nbsp;        this.organizationId = organizationId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getPadName() {
+<b class="nc">&nbsp;        return padName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setPadName(String padName) {
+<b class="nc">&nbsp;        this.padName = padName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getUpdatedTimezone() {
+<b class="nc">&nbsp;        return updatedTimezone;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setUpdatedTimezone(String updatedTimezone) {
+<b class="nc">&nbsp;        this.updatedTimezone = updatedTimezone;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getPreviousTimezone() {
+<b class="nc">&nbsp;        return previousTimezone;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setPreviousTimezone(String previousTimezone) {
+<b class="nc">&nbsp;        this.previousTimezone = previousTimezone;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-04-27 10:39</div>
+</div>
+</body>
+</html>

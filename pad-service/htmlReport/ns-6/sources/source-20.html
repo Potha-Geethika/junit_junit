@@ -1,0 +1,379 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PumpSchedule</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.carbo.pad.model</a>
+</div>
+
+<h1>Coverage Summary for Class: PumpSchedule (com.carbo.pad.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PumpSchedule</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/47)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/51)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.carbo.pad.model;
+&nbsp;
+&nbsp;import jakarta.validation.constraints.NotEmpty;
+&nbsp;import org.springframework.data.annotation.Id;
+&nbsp;import org.springframework.data.mongodb.core.index.CompoundIndex;
+&nbsp;import org.springframework.data.mongodb.core.mapping.Document;
+&nbsp;import org.springframework.data.mongodb.core.mapping.Field;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;@Document(collection = &quot;pump-schedules&quot;)
+&nbsp;@CompoundIndex(def = &quot;{&#39;jobId&#39;: 1, &#39;wellId&#39;: 1, &#39;stageNumber&#39;: 1, &#39;stepNumber&#39;: 1}&quot;, name = &quot;job_well_stage_step_index&quot;, unique = true)
+<b class="nc">&nbsp;public class PumpSchedule {</b>
+&nbsp;    @Id
+&nbsp;    private String id;
+&nbsp;
+&nbsp;    @Field(&quot;jobId&quot;)
+&nbsp;    @NotEmpty(message = &quot;job id can not be empty&quot;)
+&nbsp;    private String jobId;
+&nbsp;
+&nbsp;    @Field(&quot;wellId&quot;)
+&nbsp;    @NotEmpty(message = &quot;well id can not be empty&quot;)
+&nbsp;    private String wellId;
+&nbsp;
+&nbsp;    @Field(&quot;stageNumber&quot;)
+&nbsp;    @NotEmpty(message = &quot;stage number can not be empty&quot;)
+&nbsp;    private Float stageNumber;
+&nbsp;
+&nbsp;    @Field(&quot;stepNumber&quot;)
+&nbsp;    @NotEmpty(message = &quot;step number can not be empty&quot;)
+&nbsp;    private Integer stepNumber;
+&nbsp;
+&nbsp;    @Field(&quot;stepName&quot;)
+&nbsp;    @NotEmpty(message = &quot;step name can not be empty&quot;)
+&nbsp;    private String stepName;
+&nbsp;
+&nbsp;    @Field(&quot;stepLength&quot;)
+&nbsp;    private String stepLength;
+&nbsp;
+&nbsp;    public String getDesignName() {
+<b class="nc">&nbsp;        return designName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setDesignName(String designName) {
+<b class="nc">&nbsp;        this.designName = designName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Field(&quot;fluidType&quot;)
+&nbsp;    private String fluidType;
+&nbsp;
+&nbsp;    @Field(&quot;designId&quot;)
+&nbsp;    private String designId;
+&nbsp;
+&nbsp;    public String getDesignId() {
+<b class="nc">&nbsp;        return designId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setDesignId(String designId) {
+<b class="nc">&nbsp;        this.designId = designId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Field(&quot;designName&quot;)
+&nbsp;    private String designName;
+&nbsp;
+&nbsp;    @Field(&quot;flush&quot;)
+&nbsp;    private Flush flush;
+&nbsp;
+&nbsp;    @Field(&quot;proppantType&quot;)
+&nbsp;    private String proppantType;
+&nbsp;
+&nbsp;    @Field(&quot;proppantConcentration&quot;)
+&nbsp;    private Float proppantConcentration;
+&nbsp;
+&nbsp;    @Field(&quot;proppantConcentrationTo&quot;)
+&nbsp;    private Float proppantConcentrationTo;
+&nbsp;
+&nbsp;    @Field(&quot;rate&quot;)
+&nbsp;    private Float rate;
+&nbsp;
+&nbsp;    @Field(&quot;rate2&quot;)
+&nbsp;    private double rate2;
+&nbsp;
+&nbsp;    @Field(&quot;cleanVol&quot;)
+&nbsp;    private Float cleanVol;
+&nbsp;
+&nbsp;    @Field(&quot;slurryVol&quot;)
+&nbsp;    private Float slurryVol;
+&nbsp;
+<b class="nc">&nbsp;    @Field(&quot;created&quot;)</b>
+<b class="nc">&nbsp;    private Long created = new Date().getTime();</b>
+&nbsp;
+<b class="nc">&nbsp;    @Field(&quot;modified&quot;)</b>
+<b class="nc">&nbsp;    private Long modified = new Date().getTime();</b>
+&nbsp;
+&nbsp;    @Field(&quot;organizationId&quot;)
+&nbsp;    private String organizationId;
+&nbsp;
+&nbsp;    @Field(&quot;ts&quot;)
+&nbsp;    private Long ts;
+&nbsp;
+&nbsp;    @Field(&quot;lastModifiedBy&quot;)
+&nbsp;    private String lastModifiedBy;
+&nbsp;
+&nbsp;    @Field(&quot;stageMode&quot;)
+&nbsp;    private String stageMode;
+&nbsp;
+&nbsp;    public String getId() {
+<b class="nc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setId(String id) {
+<b class="nc">&nbsp;        this.id = id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getStepName() {
+<b class="nc">&nbsp;        return stepName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStepName(String stepName) {
+<b class="nc">&nbsp;        this.stepName = stepName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getProppantType() {
+<b class="nc">&nbsp;        return proppantType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProppantType(String proppantType) {
+<b class="nc">&nbsp;        this.proppantType = proppantType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getProppantConcentration() {
+<b class="nc">&nbsp;        return proppantConcentration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProppantConcentration(Float proppantConcentration) {
+<b class="nc">&nbsp;        this.proppantConcentration = proppantConcentration;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getRate() {
+<b class="nc">&nbsp;        return rate;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setRate(Float rate) {
+<b class="nc">&nbsp;        this.rate = rate;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getCleanVol() {
+<b class="nc">&nbsp;        return cleanVol;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setCleanVol(Float cleanVol) {
+<b class="nc">&nbsp;        this.cleanVol = cleanVol;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getSlurryVol() {
+<b class="nc">&nbsp;        return slurryVol;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setSlurryVol(Float slurryVol) {
+<b class="nc">&nbsp;        this.slurryVol = slurryVol;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getJobId() {
+<b class="nc">&nbsp;        return jobId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setJobId(String jobId) {
+<b class="nc">&nbsp;        this.jobId = jobId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getOrganizationId() {
+<b class="nc">&nbsp;        return organizationId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setOrganizationId(String organizationId) {
+<b class="nc">&nbsp;        this.organizationId = organizationId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Long getTs() {
+<b class="nc">&nbsp;        return ts;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTs(Long ts) {
+<b class="nc">&nbsp;        this.ts = ts;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setLastModifiedBy(String lastModifiedBy) {
+<b class="nc">&nbsp;        this.lastModifiedBy = lastModifiedBy;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void updateModified() {
+<b class="nc">&nbsp;        this.modified = new Date().getTime();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Long getCreated() {
+<b class="nc">&nbsp;        return created;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Integer getStepNumber() {
+<b class="nc">&nbsp;        return stepNumber;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStepNumber(Integer stepNumber) {
+<b class="nc">&nbsp;        this.stepNumber = stepNumber;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getStageNumber() {
+<b class="nc">&nbsp;        return stageNumber;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStageNumber(Float stageNumber) {
+<b class="nc">&nbsp;        this.stageNumber = stageNumber;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getStepLength() {
+<b class="nc">&nbsp;        return stepLength;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStepLength(String stepLength) {
+<b class="nc">&nbsp;        this.stepLength = stepLength;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getWellId() {
+<b class="nc">&nbsp;        return wellId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setWellId(String wellId) {
+<b class="nc">&nbsp;        this.wellId = wellId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getProppantConcentrationTo() {
+<b class="nc">&nbsp;        return proppantConcentrationTo;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProppantConcentrationTo(Float proppantConcentrationTo) {
+<b class="nc">&nbsp;        this.proppantConcentrationTo = proppantConcentrationTo;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getFluidType() {
+<b class="nc">&nbsp;        return fluidType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setFluidType(String fluidType) {
+<b class="nc">&nbsp;        this.fluidType = fluidType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Long getModified() {
+<b class="nc">&nbsp;        return modified;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Flush getFlush() {
+<b class="nc">&nbsp;        return flush;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setFlush(Flush flush) {
+<b class="nc">&nbsp;        this.flush = flush;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public double getRate2() {
+<b class="nc">&nbsp;        return rate2;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setRate2(double rate2) {
+<b class="nc">&nbsp;        this.rate2 = rate2;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getStageMode() {
+<b class="nc">&nbsp;        return stageMode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStageMode(String stageMode) {
+<b class="nc">&nbsp;        this.stageMode = stageMode;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-04-27 10:39</div>
+</div>
+</body>
+</html>

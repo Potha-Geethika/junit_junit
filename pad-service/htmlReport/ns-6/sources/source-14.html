@@ -1,0 +1,386 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Job</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.carbo.pad.model</a>
+</div>
+
+<h1>Coverage Summary for Class: Job (com.carbo.pad.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Job</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    1.3%
+  </span>
+  <span class="absValue">
+    (1/75)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/544)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    23.7%
+  </span>
+  <span class="absValue">
+    (23/97)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.carbo.pad.model;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.annotation.JsonIgnore;
+&nbsp;import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+&nbsp;import com.fasterxml.jackson.annotation.JsonProperty;
+&nbsp;import jakarta.validation.constraints.NotBlank;
+&nbsp;import jakarta.validation.constraints.NotEmpty;
+&nbsp;import jakarta.validation.constraints.Size;
+&nbsp;import lombok.Data;
+&nbsp;import org.springframework.data.annotation.Id;
+&nbsp;import org.springframework.data.mongodb.core.index.CompoundIndex;
+&nbsp;import org.springframework.data.mongodb.core.index.Indexed;
+&nbsp;import org.springframework.data.mongodb.core.mapping.Document;
+&nbsp;import org.springframework.data.mongodb.core.mapping.Field;
+&nbsp;
+&nbsp;import java.util.*;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@Document(collection = &quot;jobs&quot;)
+&nbsp;@JsonIgnoreProperties(ignoreUnknown = true)
+&nbsp;@CompoundIndex(def = &quot;{&#39;_id&#39;: 1, &#39;users._id&#39;: 1}&quot;, name = &quot;job_id_user_id_index&quot;, unique = true)
+&nbsp;@CompoundIndex(def = &quot;{&#39;organizationId&#39;: 1, &#39;jobNumber&#39;: 1}&quot;, name = &quot;unique_organizationid_jobnumber_index&quot;, unique = true)
+<b class="pc">&nbsp;@Data</b>
+&nbsp;public class Job {
+&nbsp;    @Id
+<b class="nc">&nbsp;    private String id;</b>
+&nbsp;
+&nbsp;    @Field(&quot;name&quot;)
+&nbsp;    @NotEmpty(message = &quot;name can not be empty&quot;)
+&nbsp;    @Size(max = 100, message = &quot;name can not be more than 100 characters.&quot;)
+<b class="nc">&nbsp;    private String name;</b>
+&nbsp;
+&nbsp;    @Field(&quot;jobNumber&quot;)
+&nbsp;    @NotEmpty(message = &quot;jobNumber can not be empty&quot;)
+&nbsp;    @Size(max = 14, message = &quot;jobNumber can not be more than 14 characters.&quot;)
+<b class="nc">&nbsp;    private String jobNumber;</b>
+&nbsp;
+&nbsp;    @Field(&quot;fleet&quot;)
+<b class="nc">&nbsp;    private String fleet;</b>
+&nbsp;
+&nbsp;    @Field(&quot;operator&quot;)
+<b class="nc">&nbsp;    private String operator;</b>
+&nbsp;
+&nbsp;    @Field(&quot;pad&quot;)
+<b class="nc">&nbsp;    private String pad;</b>
+&nbsp;
+&nbsp;    @Field(&quot;location&quot;)
+<b class="nc">&nbsp;    private String location;</b>
+&nbsp;
+&nbsp;    @Field(&quot;zipper&quot;)
+<b class="nc">&nbsp;    private Boolean zipper;</b>
+&nbsp;
+&nbsp;    @Field(&quot;refrac&quot;)
+<b class="nc">&nbsp;    private boolean refrac;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;wells&quot;)</b>
+<b class="nc">&nbsp;    private List&lt;Well&gt; wells = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    @Field(&quot;targetStagesPerDay&quot;)
+<b class="nc">&nbsp;    private int targetStagesPerDay;</b>
+&nbsp;
+&nbsp;    @Field(&quot;targetDailyPumpTime&quot;)
+<b class="nc">&nbsp;    private float targetDailyPumpTime;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;proppantSchematicType&quot;)</b>
+<b class="nc">&nbsp;    private String proppantSchematicType = &quot;silos&quot;;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;numberOfUnits&quot;)</b>
+<b class="fc">&nbsp;    private Integer numberOfUnits = 3;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;coneLbs&quot;)</b>
+<b class="fc">&nbsp;    private Float coneLbs = 1400.0f;</b>
+&nbsp;
+&nbsp;    @Field(&quot;curWellId&quot;)
+<b class="nc">&nbsp;    private String curWellId;</b>
+&nbsp;
+&nbsp;    @Field(&quot;curStage&quot;)
+<b class="nc">&nbsp;    private String curStage;</b>
+&nbsp;
+&nbsp;    @Field(&quot;startDate&quot;)
+<b class="nc">&nbsp;    private Long startDate;</b>
+&nbsp;
+&nbsp;    @Field(&quot;endDate&quot;)
+<b class="nc">&nbsp;    private Long endDate;</b>
+&nbsp;
+&nbsp;    @Field(&quot;expectedStartDate&quot;)
+<b class="nc">&nbsp;    private Long expectedStartDate;</b>
+&nbsp;
+&nbsp;    @Field(&quot;expectedEndDate&quot;)
+<b class="nc">&nbsp;    private Long expectedEndDate;</b>
+&nbsp;
+&nbsp;    @Field(&quot;startDateStr&quot;)
+<b class="nc">&nbsp;    private String startDateStr;</b>
+&nbsp;
+&nbsp;    @Field(&quot;timezone&quot;)
+<b class="nc">&nbsp;    private String timezone;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;discounts&quot;)</b>
+<b class="nc">&nbsp;    private Map&lt;String, Float&gt; discounts = new HashMap&lt;&gt;();</b>
+&nbsp;
+&nbsp;    @Field(&quot;organizationId&quot;)
+&nbsp;    @Indexed
+<b class="nc">&nbsp;    private String organizationId;</b>
+&nbsp;
+&nbsp;    @Field(&quot;status&quot;)
+<b class="nc">&nbsp;    private String status;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;beltDirection&quot;)</b>
+<b class="nc">&nbsp;    private String beltDirection = &quot;left&quot;;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;mileageChargeDistance&quot;)</b>
+<b class="fc">&nbsp;    private Integer mileageChargeDistance = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;activityLogStartTime&quot;)</b>
+<b class="nc">&nbsp;    private String activityLogStartTime = &quot;00:00&quot;;</b>
+&nbsp;
+&nbsp;    @Field(&quot;wellheadCo&quot;)
+<b class="nc">&nbsp;    private String wellheadCo;</b>
+&nbsp;
+&nbsp;    @Field(&quot;wirelineCo&quot;)
+<b class="nc">&nbsp;    private String wirelineCo;</b>
+&nbsp;
+&nbsp;    @Field(&quot;waterTransferCo&quot;)
+<b class="nc">&nbsp;    private String waterTransferCo;</b>
+&nbsp;
+&nbsp;    @Field(&quot;goToMeetingId&quot;)
+<b class="nc">&nbsp;    private String goToMeetingId;</b>
+&nbsp;
+&nbsp;    @Field(&quot;includeToeStage&quot;)
+<b class="nc">&nbsp;    private Boolean includeToeStage;</b>
+&nbsp;
+&nbsp;    @Field(&quot;predefinedChannels&quot;)
+<b class="nc">&nbsp;    private List&lt;String&gt; predefinedChannels;</b>
+&nbsp;
+&nbsp;    @Field(&quot;sharedWithOrganizationId&quot;)
+<b class="nc">&nbsp;    private String sharedWithOrganizationId;</b>
+&nbsp;
+&nbsp;    @JsonIgnore
+<b class="nc">&nbsp;    private Integer padStageTotal;</b>
+&nbsp;
+&nbsp;    @Field(&quot;ts&quot;)
+<b class="nc">&nbsp;    private Long ts;</b>
+&nbsp;
+&nbsp;    @Field(&quot;rts&quot;)
+<b class="nc">&nbsp;    private Long rts;</b>
+&nbsp;
+&nbsp;    @Field(&quot;serviceCompany&quot;)
+<b class="nc">&nbsp;    private String serviceCompany;</b>
+&nbsp;
+&nbsp;    @Field(&quot;disableOffline&quot;)
+<b class="nc">&nbsp;    private Boolean disableOffline;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;created&quot;)</b>
+<b class="fc">&nbsp;    private Long created = new Date().getTime();</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;modified&quot;)</b>
+<b class="fc">&nbsp;    private Long modified = new Date().getTime();</b>
+&nbsp;
+&nbsp;    @Field(&quot;startDateModified&quot;)
+<b class="nc">&nbsp;    private Long startDateModified;</b>
+&nbsp;
+&nbsp;    @Field(&quot;backupDate&quot;)
+&nbsp;    @Indexed
+<b class="nc">&nbsp;    private Date backupDate;</b>
+&nbsp;
+&nbsp;    @Field(&quot;lastModifiedBy&quot;)
+<b class="nc">&nbsp;    private String lastModifiedBy;</b>
+&nbsp;
+&nbsp;    @Field(&quot;connectJobTime&quot;)
+<b class="nc">&nbsp;    private boolean connectJobTime;</b>
+&nbsp;
+&nbsp;    @Field(&quot;automatize&quot;)
+<b class="nc">&nbsp;    private boolean automatize;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;additionalJobsFieldTicket&quot;)</b>
+<b class="nc">&nbsp;    private List&lt;String&gt; additionalJobsFieldTicket = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;    @Field(&quot;hpp&quot;)
+<b class="nc">&nbsp;    private String hpp;</b>
+&nbsp;
+&nbsp;    @Field(&quot;mpn&quot;)
+<b class="nc">&nbsp;    private String mpn;</b>
+&nbsp;
+&nbsp;    @Field(&quot;connector&quot;)
+<b class="nc">&nbsp;    private String connector;</b>
+&nbsp;
+&nbsp;    @Field(&quot;singleOrDouble&quot;)
+<b class="nc">&nbsp;    private String singleOrDouble;</b>
+&nbsp;
+&nbsp;    @Field(&quot;length&quot;)
+<b class="nc">&nbsp;    private String length;</b>
+&nbsp;
+&nbsp;    @Field(&quot;manufacturer&quot;)
+<b class="nc">&nbsp;    private String manufacturer;</b>
+&nbsp;
+&nbsp;
+&nbsp;    @Field(&quot;swapOverTime&quot;)
+<b class="nc">&nbsp;    private int swapOverTime;</b>
+&nbsp;
+&nbsp;    @Field(&quot;targetWirelineTimePerStage&quot;)
+<b class="nc">&nbsp;    private float targetWirelineTimePerStage;</b>
+&nbsp;
+&nbsp;    @Field(&quot;targetMaintenanceTimePerDay&quot;)
+<b class="nc">&nbsp;    private float targetMaintenanceTimePerDay;</b>
+&nbsp;
+&nbsp;    @Field(&quot;latestBtu&quot;)
+<b class="nc">&nbsp;    private float latestBtu;</b>
+&nbsp;
+&nbsp;    @Field(&quot;btu&quot;)
+<b class="nc">&nbsp;    private float btu;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;hideDiscounts &quot;)</b>
+<b class="nc">&nbsp;    private boolean hideDiscounts = false;</b>
+&nbsp;
+&nbsp;    @Field(&quot;districtId&quot;)
+<b class="nc">&nbsp;    private String districtId;</b>
+&nbsp;
+&nbsp;    @Field(&quot;proposalId&quot;)
+<b class="nc">&nbsp;    private String proposalId;</b>
+&nbsp;
+&nbsp;    @Field(&quot;priceBookId&quot;)
+<b class="nc">&nbsp;    private String priceBookId;</b>
+&nbsp;
+&nbsp;    @Field(&quot;districtWhenCompleted&quot;)
+<b class="nc">&nbsp;    private String districtWhenCompleted;</b>
+&nbsp;
+&nbsp;    @Field(&quot;isNewWorkflow&quot;)
+<b class="nc">&nbsp;    private boolean isNewWorkflow;</b>
+&nbsp;
+&nbsp;    @Field(&quot;receiveEBol&quot;)
+<b class="nc">&nbsp;    private Boolean receiveEBol;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;fitToPage&quot;)</b>
+<b class="fc">&nbsp;    private Boolean fitToPage = false;</b>
+&nbsp;    @Field(&quot;fleetType&quot;)
+<b class="nc">&nbsp;    private String fleetType;</b>
+&nbsp;    @Field(&quot;dualFuelPumpCount&quot;)
+<b class="nc">&nbsp;    private int dualFuelPumpCount;</b>
+<b class="fc">&nbsp;    @Field(&quot;taxFlag&quot;)</b>
+<b class="nc">&nbsp;    private boolean taxFlag = false;</b>
+&nbsp;    @Field(&quot;taxPercentage&quot;)
+<b class="nc">&nbsp;    private float taxPercentage;</b>
+&nbsp;
+&nbsp;    @Field(&quot;splitStream&quot;)
+<b class="nc">&nbsp;    private boolean splitStream;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;producedWater&quot;)</b>
+<b class="nc">&nbsp;    private boolean producedWater=false;</b>
+&nbsp;
+<b class="fc">&nbsp;    @Field(&quot;dirtyMixed&quot;)</b>
+<b class="nc">&nbsp;    private boolean dirtyMixed = false;</b>
+&nbsp;
+&nbsp;    @Field(&quot;cng&quot;)
+<b class="nc">&nbsp;    private boolean cng;</b>
+&nbsp;
+&nbsp;    @Field(&quot;lng&quot;)
+<b class="nc">&nbsp;    private boolean lng;</b>
+&nbsp;
+&nbsp;    @Field(&quot;fieldGas&quot;)
+<b class="nc">&nbsp;    private boolean fieldGas;</b>
+&nbsp;
+&nbsp;    @NotBlank(message = &quot;operationsType can&#39;t be blank&quot;)
+&nbsp;    @Field(&quot;operationsType&quot;)
+<b class="nc">&nbsp;    private String operationsType;</b>
+&nbsp;
+&nbsp;    @NotBlank(message = &quot;padEnergyType can&#39;t be blank&quot;)
+&nbsp;    @Field(&quot;padEnergyType&quot;)
+<b class="nc">&nbsp;    private String padEnergyType;</b>
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-04-27 10:39</div>
+</div>
+</body>
+</html>

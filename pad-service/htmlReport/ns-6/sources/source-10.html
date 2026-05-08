@@ -1,0 +1,336 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > FracProTreatment</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.carbo.pad.model</a>
+</div>
+
+<h1>Coverage Summary for Class: FracProTreatment (com.carbo.pad.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FracProTreatment</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/52)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/68)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.carbo.pad.model;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+<b class="nc">&nbsp;public class FracProTreatment {</b>
+&nbsp;    private String name;
+&nbsp;    private Integer wellId;
+&nbsp;    private String formationName;
+&nbsp;    private Float totalVolume;
+&nbsp;    private Float pumpDownVolume;
+&nbsp;    private Float averagePres;
+&nbsp;    private Float maxPres;
+&nbsp;    private Float avgSlurryReturnRate;
+&nbsp;    private Float maxFluidRate;
+&nbsp;    private Float mdFormationTop;
+&nbsp;    private Float mdFormationBottom;
+&nbsp;    private Integer totalPerfs;
+&nbsp;    private Float breakDownPres;
+&nbsp;    private Float initialShutinPres;
+&nbsp;    private Float fractureGradient;
+&nbsp;    private Float proppantLadenVol;
+&nbsp;    private Long timeStart;
+&nbsp;    private Integer timeZone;
+&nbsp;    private Integer dayLight;
+&nbsp;
+&nbsp;    private Float desCleanVol;
+&nbsp;    private Float desSlurryVol;
+&nbsp;    private Integer ballSeatTime;
+&nbsp;    private Long baseTreatmentDateTime;
+&nbsp;    private float producedWater;
+&nbsp;    private List&lt;Perforations&gt; perforations;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;    public String getName() {
+<b class="nc">&nbsp;        return name;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setName(String name) {
+<b class="nc">&nbsp;        this.name = name;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public Integer getWellId() {
+<b class="nc">&nbsp;        return wellId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setWellId(Integer name) {
+<b class="nc">&nbsp;        this.wellId = wellId;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public String getFormationName() {
+<b class="nc">&nbsp;        return formationName;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setFormationName(String formationName) {
+<b class="nc">&nbsp;        this.formationName = formationName;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public Float getTotalVolume() {
+<b class="nc">&nbsp;        return totalVolume;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTotalVolume(Float totalVolume) {
+<b class="nc">&nbsp;        this.totalVolume = totalVolume;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public Float getPumpDownVolume() {
+<b class="nc">&nbsp;        return pumpDownVolume;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setPumpDownVolume(Float pumpDownVolume) {
+<b class="nc">&nbsp;        this.pumpDownVolume = pumpDownVolume;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public Float getAveragePres() {
+<b class="nc">&nbsp;        return averagePres;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setAveragePres(Float averagePres) {
+<b class="nc">&nbsp;        this.averagePres = averagePres;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public Float getMaxPres() {
+<b class="nc">&nbsp;        return maxPres;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMaxPres(Float maxPres) {
+<b class="nc">&nbsp;        this.maxPres = maxPres;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public Float getAvgSlurryReturnRate() {
+<b class="nc">&nbsp;        return avgSlurryReturnRate;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setAvgSlurryReturnRate(Float avgSlurryReturnRate) {
+<b class="nc">&nbsp;        this.avgSlurryReturnRate = avgSlurryReturnRate;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public Float getMaxFluidRate() {
+<b class="nc">&nbsp;        return maxFluidRate;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMaxFluidRate(Float maxFluidRate) {
+<b class="nc">&nbsp;        this.maxFluidRate = maxFluidRate;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public Float getMdFormationTop() {
+<b class="nc">&nbsp;        return mdFormationTop;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMdFormationTop(Float mdFormationTop) {
+<b class="nc">&nbsp;        this.mdFormationTop = mdFormationTop;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public Float getMdFormationBottom() {
+<b class="nc">&nbsp;        return mdFormationBottom;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMdFormationBottom(Float mdFormationBottom) {
+<b class="nc">&nbsp;        this.mdFormationBottom = mdFormationBottom;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public Integer getTotalPerfs() {
+<b class="nc">&nbsp;        return totalPerfs;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTotalPerfs(Integer totalPerfs) {
+<b class="nc">&nbsp;        this.totalPerfs = totalPerfs;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public Float getBreakDownPres() {
+<b class="nc">&nbsp;        return breakDownPres;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setBreakDownPres(Float breakDownPres) {
+<b class="nc">&nbsp;        this.breakDownPres = breakDownPres;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public Float getInitialShutinPres() {
+<b class="nc">&nbsp;        return initialShutinPres;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setInitialShutinPres(Float initialShutinPres) {
+<b class="nc">&nbsp;        this.initialShutinPres = initialShutinPres;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    public Float getFractureGradient() {
+<b class="nc">&nbsp;        return fractureGradient;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setFractureGradient(Float fractureGradient) {
+<b class="nc">&nbsp;        this.fractureGradient = fractureGradient;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+<b class="nc">&nbsp;    public Float getProppantLadenVol() { return proppantLadenVol; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public void setProppantLadenVol(Float proppantLadenVol) { this.proppantLadenVol = proppantLadenVol; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public Long getTimeStart() { return timeStart; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public void setTimeStart(Long timeStart) { this.timeStart = timeStart; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public Integer getTimeZone() { return timeZone; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public void setTimeZone(Integer timeZone) { this.timeZone = timeZone; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public Integer getDayLight() { return dayLight; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public void setDayLight(Integer dayLight) { this.dayLight = dayLight; }</b>
+&nbsp;
+&nbsp;
+&nbsp;
+<b class="nc">&nbsp;    public Float getDesCleanVol() { return desCleanVol; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public void setDesCleanVol(Float desCleanVol) { this.desCleanVol = desCleanVol; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public Float getDesSlurryVol() { return desSlurryVol; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public void setDesSlurryVol(Float desSlurryVol) { this.desSlurryVol = desSlurryVol; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public Integer getBallSeatTime() { return ballSeatTime; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public void setBallSeatTime(Integer ballSeatTime) { this.ballSeatTime = ballSeatTime; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public Long getBaseTreatmentDateTime() { return baseTreatmentDateTime; }</b>
+&nbsp;
+<b class="nc">&nbsp;    public void setBaseTreatmentDateTime(Long baseTreatmentDateTime) { this.baseTreatmentDateTime = baseTreatmentDateTime; }</b>
+&nbsp;
+&nbsp;
+<b class="nc">&nbsp;    public List&lt;Perforations&gt; getPerforations() {return perforations;}</b>
+&nbsp;
+<b class="nc">&nbsp;    public void setPerforations(List&lt;Perforations&gt; perforations) {this.perforations = perforations;}</b>
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;    public float getProducedWater() {
+<b class="nc">&nbsp;        return producedWater;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setProducedWater(float producedWater) {
+<b class="nc">&nbsp;        this.producedWater = producedWater;</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public String toString() {
+<b class="nc">&nbsp;        return &quot;FracProTreatment{&quot; +</b>
+&nbsp;                &quot;name=&#39;&quot; + name + &#39;\&#39;&#39; +
+&nbsp;                &quot;, formationName=&#39;&quot; + formationName + &#39;\&#39;&#39; +
+&nbsp;                &quot;, totalVolume=&quot; + totalVolume +
+&nbsp;                &quot;, pumpDownVolume=&quot; + pumpDownVolume +
+&nbsp;                &quot;, averagePres=&quot; + averagePres +
+&nbsp;                &quot;, maxPres=&quot; + maxPres +
+&nbsp;                &quot;, avgSlurryReturnRate=&quot; + avgSlurryReturnRate +
+&nbsp;                &quot;, maxFluidRate=&quot; + maxFluidRate +
+&nbsp;                &quot;, mdFormationTop=&quot; + mdFormationTop +
+&nbsp;                &quot;, mdFormationBottom=&quot; + mdFormationBottom +
+&nbsp;                &quot;, totalPerfs=&quot; + totalPerfs +
+&nbsp;                &quot;, breakDownPres=&quot; + breakDownPres +
+&nbsp;                &quot;, initialShutinPres=&quot; + initialShutinPres +
+&nbsp;                &quot;, fractureGradient=&quot; + fractureGradient +
+&nbsp;                &quot;, proppantLadenVol=&quot; + proppantLadenVol +
+&nbsp;                &quot;, timeStart=&quot; + timeStart +
+&nbsp;                &quot;, timeZone=&quot; + timeZone +
+&nbsp;                &quot;, dayLight=&quot; + dayLight +
+&nbsp;                &quot;, producedWater=&quot; + producedWater +
+&nbsp;                &quot;, producedWater=&quot; + desCleanVol +
+&nbsp;                &quot;, producedWater=&quot; + desSlurryVol +
+&nbsp;                &quot;, ballSeatTime=&quot; + ballSeatTime +
+&nbsp;                &quot;, baseTreatmentDateTime=&quot; + baseTreatmentDateTime +
+&nbsp;                &#39;}&#39;;
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-04-27 10:39</div>
+</div>
+</body>
+</html>

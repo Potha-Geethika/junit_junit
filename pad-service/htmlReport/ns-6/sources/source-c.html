@@ -1,0 +1,229 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EndStageEmailPayload</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.carbo.pad.model</a>
+</div>
+
+<h1>Coverage Summary for Class: EndStageEmailPayload (com.carbo.pad.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EndStageEmailPayload</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/250)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/36)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.carbo.pad.model;
+&nbsp;
+&nbsp;import lombok.Data;
+&nbsp;import org.springframework.data.annotation.Id;
+&nbsp;import org.springframework.data.mongodb.core.index.Indexed;
+&nbsp;import org.springframework.data.mongodb.core.mapping.Document;
+&nbsp;import org.springframework.data.mongodb.core.mapping.Field;
+&nbsp;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+<b class="nc">&nbsp;@Data</b>
+&nbsp;@Document(collection = &quot;emails&quot;)
+&nbsp;public class EndStageEmailPayload {
+&nbsp;    @Id
+<b class="nc">&nbsp;    protected String id;</b>
+&nbsp;
+&nbsp;    @Field(&quot;emailId&quot;)
+&nbsp;    @Indexed(unique = false)
+<b class="nc">&nbsp;    protected String emailId;</b>
+&nbsp;
+&nbsp;    @Field(&quot;jobId&quot;)
+&nbsp;    @Indexed(unique = false)
+<b class="nc">&nbsp;    private String jobId;</b>
+&nbsp;
+&nbsp;    @Field(&quot;well&quot;)
+<b class="nc">&nbsp;    private String well;</b>
+&nbsp;
+&nbsp;    @Field(&quot;stage&quot;)
+<b class="nc">&nbsp;    private String stage;</b>
+&nbsp;
+&nbsp;    @Field(&quot;pad&quot;)
+<b class="nc">&nbsp;    private String pad;</b>
+&nbsp;
+&nbsp;    @Field(&quot;startTime&quot;)
+<b class="nc">&nbsp;    private String startTime;</b>
+&nbsp;
+&nbsp;    @Field(&quot;finishTime&quot;)
+<b class="nc">&nbsp;    private String finishTime;</b>
+&nbsp;
+&nbsp;    @Field(&quot;pumpStart&quot;)
+<b class="nc">&nbsp;    private Integer pumpStart;</b>
+&nbsp;
+&nbsp;    @Field(&quot;pumpEnd&quot;)
+<b class="nc">&nbsp;    private Integer pumpEnd;</b>
+&nbsp;
+&nbsp;    @Field(&quot;fieldCoordinator&quot;)
+<b class="nc">&nbsp;    private String fieldCoordinator;</b>
+&nbsp;
+&nbsp;    @Field(&quot;serviceSupervisor&quot;)
+<b class="nc">&nbsp;    private String serviceSupervisor;</b>
+&nbsp;
+&nbsp;    @Field(&quot;targetStagesPerDay&quot;)
+<b class="nc">&nbsp;    private Integer targetStagesPerDay;</b>
+&nbsp;
+&nbsp;    @Field(&quot;actualStagesPerDay&quot;)
+<b class="nc">&nbsp;    private Integer actualStagesPerDay;</b>
+&nbsp;
+&nbsp;    @Field(&quot;averagePressure&quot;)
+<b class="nc">&nbsp;    private Float averagePressure;</b>
+&nbsp;
+&nbsp;    @Field(&quot;averageRate&quot;)
+<b class="nc">&nbsp;    private Float averageRate;</b>
+&nbsp;
+&nbsp;    @Field(&quot;totalCleanFluid&quot;)
+<b class="nc">&nbsp;    private Integer totalCleanFluid;</b>
+&nbsp;
+&nbsp;    @Field(&quot;blender&quot;)
+<b class="nc">&nbsp;    private String blender;</b>
+&nbsp;
+&nbsp;    @Field(&quot;blender2&quot;)
+<b class="nc">&nbsp;    private String blender2;</b>
+&nbsp;
+&nbsp;    @Field(&quot;additionalComments&quot;)
+<b class="nc">&nbsp;    private String additionalComments;</b>
+&nbsp;
+&nbsp;    @Field(&quot;formationName&quot;)
+<b class="nc">&nbsp;    private String formationName;</b>
+&nbsp;
+&nbsp;    @Field(&quot;pumpsOnGas&quot;)
+<b class="nc">&nbsp;    private Float pumpsOnGas;</b>
+&nbsp;
+&nbsp;    @Field(&quot;diesel&quot;)
+<b class="nc">&nbsp;    private Float diesel;</b>
+&nbsp;
+&nbsp;    @Field(&quot;fieldGas&quot;)
+<b class="nc">&nbsp;    private Float fieldGas;</b>
+&nbsp;
+&nbsp;    @Field(&quot;cng&quot;)
+<b class="nc">&nbsp;    private Float cng;</b>
+&nbsp;
+<b class="nc">&nbsp;    @Field(&quot;lng&quot;)</b>
+<b class="nc">&nbsp;    private Float lng=0.0f;</b>
+&nbsp;
+&nbsp;    @Field(&quot;btu&quot;)
+<b class="nc">&nbsp;    private float btu;</b>
+&nbsp;
+&nbsp;    @Field(&quot;blender2PropVolume&quot;)
+<b class="nc">&nbsp;    private double blender2PropVolume;</b>
+&nbsp;
+&nbsp;    @Field(&quot;organizationId&quot;)
+&nbsp;    @Indexed(unique = false)
+<b class="nc">&nbsp;    private String organizationId;</b>
+&nbsp;
+&nbsp;    @Field(&quot;type&quot;)
+<b class="nc">&nbsp;    private EmailType type;</b>
+&nbsp;
+<b class="nc">&nbsp;    @Field(&quot;created&quot;)</b>
+<b class="nc">&nbsp;    private Long created = new Date().getTime();</b>
+&nbsp;
+<b class="nc">&nbsp;    @Field(&quot;modified&quot;)</b>
+<b class="nc">&nbsp;    private Long modified  = new Date().getTime();</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-04-27 10:39</div>
+</div>
+</body>
+</html>

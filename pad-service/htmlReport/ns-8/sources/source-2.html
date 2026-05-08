@@ -1,0 +1,1399 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > JobDashboardService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.carbo.pad.services</a>
+</div>
+
+<h1>Coverage Summary for Class: JobDashboardService (com.carbo.pad.services)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">JobDashboardService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    24.4%
+  </span>
+  <span class="absValue">
+    (10/41)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/368)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    4.9%
+  </span>
+  <span class="absValue">
+    (37/754)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.carbo.pad.services;
+&nbsp;
+&nbsp;import com.carbo.pad.utils.ActivityLogUtil;
+&nbsp;import com.carbo.pad.model.*;
+&nbsp;import com.carbo.pad.model.Error;
+&nbsp;import com.carbo.pad.repository.JobMongoDbRepository;
+&nbsp;import jakarta.ws.rs.client.Client;
+&nbsp;import jakarta.ws.rs.client.ClientBuilder;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.data.mongodb.core.MongoTemplate;
+&nbsp;import org.springframework.data.mongodb.core.query.Criteria;
+&nbsp;import org.springframework.data.mongodb.core.query.Query;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.util.ObjectUtils;
+&nbsp;
+&nbsp;import java.time.Duration;
+&nbsp;import java.time.Instant;
+&nbsp;import java.time.ZoneId;
+&nbsp;import java.time.ZonedDateTime;
+&nbsp;import java.util.*;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;import static com.carbo.pad.utils.ActivityLogUtil.round;
+&nbsp;import static com.carbo.pad.utils.ControllerUtil.getOrganization;
+&nbsp;import static com.carbo.pad.utils.ControllerUtil.getOrganizationId;
+&nbsp;import static com.carbo.pad.utils.ControllerUtil.getOrganizationType;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class JobDashboardService {
+&nbsp;
+&nbsp;    private final MongoTemplate mongoTemplate;
+&nbsp;    private final AICallsService aiCallsService;
+&nbsp;    private final JobMongoDbRepository jobMongoDbRepository;
+&nbsp;
+&nbsp;    @Autowired
+<b class="fc">&nbsp;    public JobDashboardService(MongoTemplate mongoTemplate, AICallsService aiCallsService,JobMongoDbRepository jobMongoDbRepository) {</b>
+<b class="fc">&nbsp;        this.mongoTemplate = mongoTemplate;</b>
+<b class="fc">&nbsp;        this.aiCallsService = aiCallsService;</b>
+<b class="fc">&nbsp;        this.jobMongoDbRepository = jobMongoDbRepository;</b>
+<b class="fc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    /* -----------------------------------------------------------
+&nbsp;       Helper Methods for Responses
+&nbsp;     ----------------------------------------------------------- */
+&nbsp;
+&nbsp;    private ResponseEntity&lt;Error&gt; buildErrorResponse(String code, String message, HttpStatus status) {
+<b class="fc">&nbsp;        return ResponseEntity.status(status)</b>
+<b class="fc">&nbsp;                .body(Error.builder()</b>
+<b class="fc">&nbsp;                        .errorCode(code)</b>
+<b class="fc">&nbsp;                        .errorMessage(message)</b>
+<b class="fc">&nbsp;                        .httpStatus(status)</b>
+<b class="fc">&nbsp;                        .build());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Optional&lt;Job&gt; getJobById(HttpServletRequest request, String jobId) {
+<b class="fc">&nbsp;        String userOrgId = getOrganizationId(request);</b>
+<b class="nc">&nbsp;        String orgType = &quot;OPERATOR&quot;;</b>
+&nbsp;        try {
+<b class="nc">&nbsp;            orgType = getOrganizationType(request);</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        if (&quot;OPERATOR&quot;.equalsIgnoreCase(orgType)) {</b>
+<b class="nc">&nbsp;            return jobMongoDbRepository.findByIdAndSharedWithOrganizationId(jobId, userOrgId);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            return jobMongoDbRepository.findByIdAndOrganizationId(jobId, userOrgId);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; getPadDetails(HttpServletRequest request, String jobId) {
+&nbsp;        try {
+<b class="fc">&nbsp;            String organizationName = getOrganization(request);</b>
+<b class="nc">&nbsp;            String timeZone = request.getHeader(&quot;Time-Zone&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            Optional&lt;Job&gt; jobOptional = getJobById(request, jobId);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (jobOptional.isEmpty()) {</b>
+<b class="nc">&nbsp;                return buildErrorResponse(&quot;NOT_FOUND&quot;, &quot;Job not found or access denied&quot;, HttpStatus.NOT_FOUND);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            Job job = jobOptional.get();</b>
+<b class="nc">&nbsp;            String organizationId = job.getOrganizationId();</b>
+&nbsp;
+<b class="nc">&nbsp;            PadDetailsResponse padDetailsResponse = new PadDetailsResponse();</b>
+&nbsp;
+<b class="nc">&nbsp;            Query activityLogQuery = new Query(</b>
+<b class="nc">&nbsp;                    Criteria.where(&quot;organizationId&quot;).is(organizationId)</b>
+<b class="nc">&nbsp;                            .and(&quot;jobId&quot;).is(jobId)</b>
+&nbsp;            );
+<b class="nc">&nbsp;            List&lt;ActivityLogEntry&gt; activityLogEntries = mongoTemplate.find(activityLogQuery, ActivityLogEntry.class, &quot;activity-log-entries&quot;);</b>
+&nbsp;
+&nbsp;            // Step 1: Fetch wells under this pad
+<b class="nc">&nbsp;            List&lt;WellDetails&gt; wells = getWellsByPad(organizationId, job);</b>
+<b class="nc">&nbsp;            padDetailsResponse.setWells(wells);</b>
+&nbsp;
+&nbsp;            // Step 2: Calculate daily averages
+<b class="nc">&nbsp;            DailyAverages dailyAverages = calculateDailyAverages(organizationId, organizationName, activityLogEntries, wells, jobId);</b>
+<b class="nc">&nbsp;            padDetailsResponse.setDailyAverages(dailyAverages);</b>
+&nbsp;
+&nbsp;            // Step 3: Calculate pad totals
+<b class="nc">&nbsp;            PadTotals padTotals = calculatePadTotals(organizationId, activityLogEntries, wells, jobId);</b>
+<b class="nc">&nbsp;            padDetailsResponse.setPadTotals(padTotals);</b>
+&nbsp;
+&nbsp;            // Step 4: Determine total number of days (from Activity Logs)
+<b class="nc">&nbsp;            double totalDays = calculatePadDurationDays(job, activityLogEntries, timeZone);</b>
+<b class="nc">&nbsp;            padDetailsResponse.setCalculatedOverDays(totalDays);</b>
+&nbsp;
+<b class="nc">&nbsp;            return ResponseEntity.ok(padDetailsResponse);</b>
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="fc">&nbsp;            log.error(&quot;Unexpected error while fetching pad details&quot;, e);</b>
+<b class="fc">&nbsp;            return buildErrorResponse(&quot;UNEXPECTED_ERROR&quot;, e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /* -----------------------------------------------------------
+&nbsp;       Pad Totals
+&nbsp;     ----------------------------------------------------------- */
+&nbsp;
+&nbsp;    private PadTotals calculatePadTotals(String organizationId, List&lt;ActivityLogEntry&gt; activityLogEntries, List&lt;WellDetails&gt; wells, String jobId) {
+<b class="nc">&nbsp;        PadTotals padTotals = new PadTotals();</b>
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, String&gt; wellMap = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        Query emailQuery = new Query(</b>
+<b class="nc">&nbsp;                Criteria.where(&quot;organizationId&quot;).is(organizationId)</b>
+<b class="nc">&nbsp;                        .and(&quot;jobId&quot;).is(jobId)</b>
+<b class="nc">&nbsp;                        .and(&quot;type&quot;).is(&quot;END_STAGE&quot;)</b>
+&nbsp;        );
+<b class="nc">&nbsp;        List&lt;EndStageEmailPayload&gt; endStageEmails = mongoTemplate.find(emailQuery, EndStageEmailPayload.class, &quot;emails&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, EndStageEmailPayload&gt; latestEmailsMap = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        if (endStageEmails != null &amp;&amp; !endStageEmails.isEmpty()) {</b>
+<b class="nc">&nbsp;            for (EndStageEmailPayload email : endStageEmails) {</b>
+&nbsp;                String key;
+<b class="nc">&nbsp;                String wellName = email.getWell();</b>
+<b class="nc">&nbsp;                if (!ObjectUtils.isEmpty(wellMap.get(wellName))) {</b>
+<b class="nc">&nbsp;                    key = wellMap.get(wellName) + &quot;-&quot; + email.getStage();</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    key = wellName + &quot;-&quot; + email.getStage();</b>
+&nbsp;                }
+<b class="nc">&nbsp;                EndStageEmailPayload existing = latestEmailsMap.get(key);</b>
+<b class="nc">&nbsp;                if (existing == null || email.getCreated() &gt; existing.getCreated()) {</b>
+<b class="nc">&nbsp;                    latestEmailsMap.put(key, email);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        List&lt;EndStageEmailPayload&gt; latestEndStageEmails = new ArrayList&lt;&gt;(latestEmailsMap.values());</b>
+&nbsp;
+<b class="nc">&nbsp;        padTotals.setAverageRateBpm(calculateAverageRateBpm(latestEndStageEmails, wells));</b>
+<b class="nc">&nbsp;        padTotals.setAveragePressurePsi(calculateAveragePressurePsi(latestEndStageEmails, wells));</b>
+<b class="nc">&nbsp;        padTotals.setTotalWaterBbls(calculateTotalWaterBbls(organizationId, jobId, wells));</b>
+<b class="nc">&nbsp;        padTotals.setTotalPumpHours(calculateTotalPumpHours(activityLogEntries));</b>
+<b class="nc">&nbsp;        padTotals.setTotalProppantPumpedLbs(calculateTotalProppantPumpedLbs(organizationId, jobId));</b>
+&nbsp;
+<b class="nc">&nbsp;        return padTotals;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private double calculateTotalProppantPumpedLbs(String organizationId, String jobId) {
+&nbsp;
+<b class="nc">&nbsp;        Query query = new Query();</b>
+<b class="nc">&nbsp;        query.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;        query.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ProppantDeliveryEntryDto&gt; deliveryEntries =</b>
+<b class="nc">&nbsp;                mongoTemplate.find(query, ProppantDeliveryEntryDto.class, &quot;proppant-delivery-entries&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (deliveryEntries == null || deliveryEntries.isEmpty()) {</b>
+<b class="nc">&nbsp;            return 0.0;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, Double&gt; wellToTotalPumped = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        for (ProppantDeliveryEntryDto entry : deliveryEntries) {</b>
+<b class="nc">&nbsp;            if (entry.getUsedIn() == null) continue;</b>
+&nbsp;
+<b class="nc">&nbsp;            for (IMaterialUsed used : entry.getUsedIn()) {</b>
+<b class="nc">&nbsp;                double pumpedLbs = used.getSubmittedAmount() != null ? used.getSubmittedAmount() : 0.0;</b>
+<b class="nc">&nbsp;                wellToTotalPumped.merge(used.getWell(), pumpedLbs, Double::sum);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        double sumOfWellTotals = wellToTotalPumped.values().stream()</b>
+<b class="nc">&nbsp;                .mapToDouble(Double::doubleValue)</b>
+<b class="nc">&nbsp;                .sum();</b>
+&nbsp;
+<b class="nc">&nbsp;        return round(sumOfWellTotals, 2);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private double calculateTotalWaterBbls(String organizationId, String jobId, List&lt;WellDetails&gt; wells) {
+&nbsp;
+<b class="nc">&nbsp;        Query chemicalStageQuery = new Query(</b>
+<b class="nc">&nbsp;                Criteria.where(&quot;organizationId&quot;).is(organizationId)</b>
+<b class="nc">&nbsp;                        .and(&quot;jobId&quot;).is(jobId)</b>
+&nbsp;        );
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ChemicalStage&gt; chemicalStages =</b>
+<b class="nc">&nbsp;                mongoTemplate.find(chemicalStageQuery, ChemicalStage.class, &quot;chemical-stages&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (chemicalStages == null || chemicalStages.isEmpty()) {</b>
+<b class="nc">&nbsp;            return 0.0;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, List&lt;ChemicalStage&gt;&gt; byWell = chemicalStages.stream()</b>
+<b class="nc">&nbsp;                .filter(cs -&gt; cs.getWell() != null)</b>
+<b class="nc">&nbsp;                .collect(Collectors.groupingBy(ChemicalStage::getWell));</b>
+&nbsp;
+<b class="nc">&nbsp;        double sumOfWellTotals = byWell.values().stream()</b>
+<b class="nc">&nbsp;                .mapToDouble(wellStages -&gt;</b>
+<b class="nc">&nbsp;                        wellStages.stream()</b>
+<b class="nc">&nbsp;                                .filter(s -&gt; s.getCleanTotal() != null)</b>
+<b class="nc">&nbsp;                                .mapToDouble(ChemicalStage::getCleanTotal)</b>
+<b class="nc">&nbsp;                                .sum()</b>
+&nbsp;                )
+<b class="nc">&nbsp;                .sum();</b>
+&nbsp;
+<b class="nc">&nbsp;        int wellCount = (wells != null &amp;&amp; !wells.isEmpty()) ? wells.size() : 1;</b>
+<b class="nc">&nbsp;        double finalAvg = sumOfWellTotals / wellCount;</b>
+&nbsp;
+<b class="nc">&nbsp;        return round(finalAvg, 2);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private double calculateAverageRateBpm(List&lt;EndStageEmailPayload&gt; emails, List&lt;WellDetails&gt; wells) {
+&nbsp;
+<b class="nc">&nbsp;        if (emails == null || emails.isEmpty()) return 0.0;</b>
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, List&lt;EndStageEmailPayload&gt;&gt; byWell = emails.stream()</b>
+<b class="nc">&nbsp;                .collect(Collectors.groupingBy(EndStageEmailPayload::getWell));</b>
+&nbsp;
+<b class="nc">&nbsp;        double sumOfWellAverages = byWell.values().stream()</b>
+<b class="nc">&nbsp;                .mapToDouble(wellEmails -&gt;</b>
+<b class="nc">&nbsp;                        wellEmails.stream()</b>
+<b class="nc">&nbsp;                                .filter(e -&gt; e.getAverageRate() != null)</b>
+<b class="nc">&nbsp;                                .mapToDouble(EndStageEmailPayload::getAverageRate)</b>
+<b class="nc">&nbsp;                                .average()</b>
+<b class="nc">&nbsp;                                .orElse(0.0)</b>
+&nbsp;                )
+<b class="nc">&nbsp;                .sum();</b>
+&nbsp;
+<b class="nc">&nbsp;        int wellCount = wells != null ? wells.size() : 1;</b>
+&nbsp;
+<b class="nc">&nbsp;        double finalAvg = sumOfWellAverages / wellCount;</b>
+&nbsp;
+<b class="nc">&nbsp;        return round(finalAvg, 2);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private double calculateAveragePressurePsi(List&lt;EndStageEmailPayload&gt; emails, List&lt;WellDetails&gt; wells) {
+&nbsp;
+<b class="nc">&nbsp;        if (emails == null || emails.isEmpty()) return 0.0;</b>
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, List&lt;EndStageEmailPayload&gt;&gt; byWell = emails.stream()</b>
+<b class="nc">&nbsp;                .collect(Collectors.groupingBy(EndStageEmailPayload::getWell));</b>
+&nbsp;
+<b class="nc">&nbsp;        double sumOfWellAverages = byWell.values().stream()</b>
+<b class="nc">&nbsp;                .mapToDouble(wellEmails -&gt;</b>
+<b class="nc">&nbsp;                        wellEmails.stream()</b>
+<b class="nc">&nbsp;                                .filter(e -&gt; e.getAveragePressure() != null)</b>
+<b class="nc">&nbsp;                                .mapToDouble(EndStageEmailPayload::getAveragePressure)</b>
+<b class="nc">&nbsp;                                .average()</b>
+<b class="nc">&nbsp;                                .orElse(0.0)</b>
+&nbsp;                )
+<b class="nc">&nbsp;                .sum();</b>
+&nbsp;
+<b class="nc">&nbsp;        int wellCount = wells != null ? wells.size() : 1;</b>
+&nbsp;
+<b class="nc">&nbsp;        double finalAvg = sumOfWellAverages / wellCount;</b>
+&nbsp;
+<b class="nc">&nbsp;        return round(finalAvg, 2);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private double calculateTotalPumpHours(List&lt;ActivityLogEntry&gt; activityLogEntries) {
+&nbsp;
+<b class="nc">&nbsp;        if (activityLogEntries == null || activityLogEntries.isEmpty()) {</b>
+<b class="nc">&nbsp;            return 0.0;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Filter &quot;Pump Time&quot; entries
+<b class="nc">&nbsp;        long totalPumpMs = activityLogEntries.stream()</b>
+<b class="nc">&nbsp;                .filter(l -&gt; l.getEventOrNptCode() != null &amp;&amp; l.getEventOrNptCode().equalsIgnoreCase(&quot;Pump Time&quot;))</b>
+<b class="nc">&nbsp;                .mapToLong(ActivityLogEntry::getMillisecondsSpan)</b>
+<b class="nc">&nbsp;                .sum();</b>
+&nbsp;
+&nbsp;        // Convert ms → hours (double)
+<b class="nc">&nbsp;        return totalPumpMs / (1000.0 * 60 * 60);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /* -----------------------------------------------------------
+&nbsp;       Duration calculation
+&nbsp;     ----------------------------------------------------------- */
+&nbsp;
+&nbsp;    public double calculatePadDurationDays(Job job, List&lt;ActivityLogEntry&gt; activityLogs, String timeZoneHeader) {
+&nbsp;
+&nbsp;        ZoneId zoneId;
+&nbsp;        try {
+<b class="nc">&nbsp;            zoneId = (timeZoneHeader != null &amp;&amp; !timeZoneHeader.isEmpty())</b>
+<b class="nc">&nbsp;                    ? ZoneId.of(timeZoneHeader)</b>
+<b class="nc">&nbsp;                    : ZoneId.of(&quot;UTC&quot;);</b>
+<b class="nc">&nbsp;        } catch (Exception ex) {</b>
+<b class="nc">&nbsp;            zoneId = ZoneId.of(&quot;UTC&quot;);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        if (job == null || job.getStartDate() == null) {</b>
+<b class="nc">&nbsp;            return 0.01;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Instant startInstant = Instant.ofEpochMilli(job.getStartDate());</b>
+<b class="nc">&nbsp;        ZonedDateTime startDateTime = startInstant.atZone(zoneId);</b>
+&nbsp;
+&nbsp;        ZonedDateTime endDateTime;
+&nbsp;
+<b class="nc">&nbsp;        String status = job.getStatus() != null ? job.getStatus().toUpperCase() : &quot;&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;        if (&quot;COMPLETED&quot;.equals(status)) {</b>
+<b class="nc">&nbsp;            if (job.getEndDate() != null) {</b>
+<b class="nc">&nbsp;                endDateTime = Instant.ofEpochMilli(job.getEndDate()).atZone(zoneId);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                int maxDay = 1;</b>
+<b class="nc">&nbsp;                if (activityLogs != null &amp;&amp; !activityLogs.isEmpty()) {</b>
+<b class="nc">&nbsp;                    maxDay = activityLogs.stream()</b>
+<b class="nc">&nbsp;                            .mapToInt(ActivityLogEntry::getDay)</b>
+<b class="nc">&nbsp;                            .max()</b>
+<b class="nc">&nbsp;                            .orElse(1);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                endDateTime = startDateTime.plusDays(maxDay - 1);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+&nbsp;        else {
+<b class="nc">&nbsp;            endDateTime = ZonedDateTime.now(zoneId);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Duration duration = Duration.between(startDateTime, endDateTime);</b>
+<b class="nc">&nbsp;        double days = duration.toMillis() / (1000.0 * 60 * 60 * 24);</b>
+&nbsp;
+<b class="nc">&nbsp;        return round(days, 2);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /* -----------------------------------------------------------
+&nbsp;       Wells retrieval
+&nbsp;     ----------------------------------------------------------- */
+&nbsp;
+&nbsp;    private List&lt;WellDetails&gt; getWellsByPad(String organizationId, Job job) {
+&nbsp;
+<b class="nc">&nbsp;        if (job == null || job.getPad() == null) {</b>
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Query padQuery = new Query(</b>
+<b class="nc">&nbsp;                Criteria.where(&quot;organizationId&quot;).is(organizationId)</b>
+<b class="nc">&nbsp;                        .and(&quot;name&quot;).is(job.getPad())</b>
+&nbsp;        );
+<b class="nc">&nbsp;        Pad pad = mongoTemplate.findOne(padQuery, Pad.class, &quot;pads&quot;);</b>
+<b class="nc">&nbsp;        if (pad == null) {</b>
+<b class="nc">&nbsp;            return Collections.emptyList();</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Query wellQuery = new Query(</b>
+<b class="nc">&nbsp;                Criteria.where(&quot;organizationId&quot;).is(organizationId)</b>
+<b class="nc">&nbsp;                        .and(&quot;padId&quot;).is(pad.getId())</b>
+&nbsp;        );
+<b class="nc">&nbsp;        List&lt;Well&gt; wells = mongoTemplate.find(wellQuery, Well.class, &quot;wells&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (wells == null || wells.isEmpty()) return Collections.emptyList();</b>
+&nbsp;
+<b class="nc">&nbsp;        return wells.stream()</b>
+<b class="nc">&nbsp;                .map(w -&gt; new WellDetails(w.getId(), w.getName(), w.getApi(), w.getTotalStages()))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /* -----------------------------------------------------------
+&nbsp;       Daily averages
+&nbsp;     ----------------------------------------------------------- */
+&nbsp;
+&nbsp;    private DailyAverages calculateDailyAverages(String organizationId, String organizationName, List&lt;ActivityLogEntry&gt; activityLogEntries, List&lt;WellDetails&gt; wells, String jobId) {
+<b class="nc">&nbsp;        DailyAverages dailyAverages = new DailyAverages();</b>
+&nbsp;
+<b class="nc">&nbsp;        long days = 0;</b>
+<b class="nc">&nbsp;        if (activityLogEntries != null &amp;&amp; !activityLogEntries.isEmpty()) {</b>
+<b class="nc">&nbsp;            days = activityLogEntries.stream().map(ActivityLogEntry::getDay).collect(Collectors.toSet()).size();</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        dailyAverages.setOverallAverageStages(calculateOverallAverageStagesPerDay(activityLogEntries, wells, days));</b>
+<b class="nc">&nbsp;        dailyAverages.setAverageProppantLbs(calculateAverageProppantLbs(organizationId, jobId, wells, days));</b>
+<b class="nc">&nbsp;        dailyAverages.setAveragePumpingTimeHrs(calculateAveragePumpTime(activityLogEntries, wells, days));</b>
+<b class="nc">&nbsp;        dailyAverages.setAverageTotalNPTHrs(calculateAverageTotalNPTHrs(activityLogEntries, wells, days));</b>
+<b class="nc">&nbsp;        dailyAverages.setAverageServiceNPTHrs(calcuateAverageServiceNPTHrs(activityLogEntries, wells, days, organizationName));</b>
+<b class="nc">&nbsp;        dailyAverages.setFracEfficiencyPercentage(calculateFracEfficiency(activityLogEntries, wells));</b>
+<b class="nc">&nbsp;        return dailyAverages;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private double calculateAverageProppantLbs(String organizationId, String jobId, List&lt;WellDetails&gt; wells, long days) {
+&nbsp;
+<b class="nc">&nbsp;        if (days == 0 || wells == null || wells.isEmpty()) {</b>
+<b class="nc">&nbsp;            return 0.0;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Query query = new Query();</b>
+<b class="nc">&nbsp;        query.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;        query.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ProppantDeliveryEntryDto&gt; deliveryEntries =</b>
+<b class="nc">&nbsp;                mongoTemplate.find(query, ProppantDeliveryEntryDto.class, &quot;proppant-delivery-entries&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (deliveryEntries == null || deliveryEntries.isEmpty()) {</b>
+<b class="nc">&nbsp;            return 0.0;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, Double&gt; wellToTotalPumped = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        for (ProppantDeliveryEntryDto entry : deliveryEntries) {</b>
+<b class="nc">&nbsp;            if (entry.getUsedIn() == null) continue;</b>
+<b class="nc">&nbsp;            for (IMaterialUsed used : entry.getUsedIn()) {</b>
+<b class="nc">&nbsp;                double pumpedLbs = used.getSubmittedAmount() != null ? used.getSubmittedAmount() : 0.0;</b>
+<b class="nc">&nbsp;                wellToTotalPumped.merge(used.getWell(), pumpedLbs, Double::sum);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        double sumOfWellAverages = wellToTotalPumped.values().stream()</b>
+<b class="nc">&nbsp;                .mapToDouble(totalPumped -&gt; totalPumped / days)</b>
+<b class="nc">&nbsp;                .sum();</b>
+&nbsp;
+<b class="nc">&nbsp;        double finalAvg = sumOfWellAverages / wells.size();</b>
+&nbsp;
+<b class="nc">&nbsp;        return round(finalAvg, 2);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private double calculateFracEfficiency(List&lt;ActivityLogEntry&gt; activityLogEntries, List&lt;WellDetails&gt; wells) {
+&nbsp;
+<b class="nc">&nbsp;        if (activityLogEntries == null || activityLogEntries.isEmpty() ||</b>
+<b class="nc">&nbsp;                wells == null || wells.isEmpty()) {</b>
+<b class="nc">&nbsp;            return 0.0;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ActivityLogEntry&gt; pumpEntries = activityLogEntries.stream()</b>
+<b class="nc">&nbsp;                .filter(l -&gt; l.getEventOrNptCode() != null &amp;&amp;</b>
+<b class="nc">&nbsp;                        l.getEventOrNptCode().equalsIgnoreCase(&quot;Pump Time&quot;))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ActivityLogEntry&gt; nptEntries = activityLogEntries.stream()</b>
+<b class="nc">&nbsp;                .filter(l -&gt; l.getOpsActivity() != null &amp;&amp;</b>
+<b class="nc">&nbsp;                        l.getOpsActivity().toUpperCase().contains(&quot;NPT&quot;))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, List&lt;ActivityLogEntry&gt;&gt; pumpByWell = pumpEntries.stream()</b>
+<b class="nc">&nbsp;                .filter(l -&gt; l.getWell() != null)</b>
+<b class="nc">&nbsp;                .collect(Collectors.groupingBy(ActivityLogEntry::getWell));</b>
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, List&lt;ActivityLogEntry&gt;&gt; nptByWell = nptEntries.stream()</b>
+<b class="nc">&nbsp;                .filter(l -&gt; l.getWell() != null)</b>
+<b class="nc">&nbsp;                .collect(Collectors.groupingBy(ActivityLogEntry::getWell));</b>
+&nbsp;
+<b class="nc">&nbsp;        double totalEfficiency = 0.0;</b>
+<b class="nc">&nbsp;        int countedWells = 0;</b>
+&nbsp;
+<b class="nc">&nbsp;        for (WellDetails well : wells) {</b>
+<b class="nc">&nbsp;            String wellName = well.getName();</b>
+&nbsp;
+<b class="nc">&nbsp;            long pumpMs = pumpByWell.getOrDefault(wellName, List.of())</b>
+<b class="nc">&nbsp;                    .stream()</b>
+<b class="nc">&nbsp;                    .mapToLong(ActivityLogEntry::getMillisecondsSpan)</b>
+<b class="nc">&nbsp;                    .sum();</b>
+&nbsp;
+<b class="nc">&nbsp;            long nptMs = nptByWell.getOrDefault(wellName, List.of())</b>
+<b class="nc">&nbsp;                    .stream()</b>
+<b class="nc">&nbsp;                    .mapToLong(ActivityLogEntry::getMillisecondsSpan)</b>
+<b class="nc">&nbsp;                    .sum();</b>
+&nbsp;
+<b class="nc">&nbsp;            if (pumpMs + nptMs == 0) {</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            double wellEfficiency = (double) pumpMs / (pumpMs + nptMs);</b>
+&nbsp;
+<b class="nc">&nbsp;            totalEfficiency += wellEfficiency;</b>
+<b class="nc">&nbsp;            countedWells++;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        if (countedWells == 0) {</b>
+<b class="nc">&nbsp;            return 0.0;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        double fracEfficiencyPercentage = (totalEfficiency / countedWells) * 100;</b>
+<b class="nc">&nbsp;        return round(fracEfficiencyPercentage, 2);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    String calcuateAverageServiceNPTHrs(List&lt;ActivityLogEntry&gt; activityLogEntries,
+&nbsp;                                        List&lt;WellDetails&gt; wells,
+&nbsp;                                        long days,
+&nbsp;                                        String organizationName) {
+&nbsp;
+<b class="nc">&nbsp;        if (activityLogEntries == null || activityLogEntries.isEmpty() ||</b>
+&nbsp;                days == 0 || organizationName == null) {
+<b class="nc">&nbsp;            return &quot;00:00&quot;;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        String targetActivity = organizationName + &quot; NPT&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ActivityLogEntry&gt; serviceNptEntries = activityLogEntries.stream()</b>
+<b class="nc">&nbsp;                .filter(l -&gt; l.getOpsActivity() != null &amp;&amp;</b>
+<b class="nc">&nbsp;                        l.getOpsActivity().equalsIgnoreCase(targetActivity))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;
+<b class="nc">&nbsp;        if (serviceNptEntries.isEmpty()) {</b>
+<b class="nc">&nbsp;            return &quot;00:00&quot;;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, List&lt;ActivityLogEntry&gt;&gt; logsByWell = serviceNptEntries.stream()</b>
+<b class="nc">&nbsp;                .filter(l -&gt; l.getWell() != null)</b>
+<b class="nc">&nbsp;                .collect(Collectors.groupingBy(ActivityLogEntry::getWell));</b>
+&nbsp;
+<b class="nc">&nbsp;        long totalAvgMillisAcrossWells = 0L;</b>
+&nbsp;
+<b class="nc">&nbsp;        for (Map.Entry&lt;String, List&lt;ActivityLogEntry&gt;&gt; entry : logsByWell.entrySet()) {</b>
+<b class="nc">&nbsp;            long totalMillis = entry.getValue().stream()</b>
+<b class="nc">&nbsp;                    .mapToLong(ActivityLogEntry::getMillisecondsSpan)</b>
+<b class="nc">&nbsp;                    .sum();</b>
+<b class="nc">&nbsp;            long avgMillisPerDay = totalMillis / days;</b>
+<b class="nc">&nbsp;            totalAvgMillisAcrossWells += avgMillisPerDay;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        long overallAvgMillis = totalAvgMillisAcrossWells / wells.size();</b>
+&nbsp;
+<b class="nc">&nbsp;        long totalMinutes = overallAvgMillis / (1000 * 60);</b>
+<b class="nc">&nbsp;        long hours = totalMinutes / 60;</b>
+<b class="nc">&nbsp;        long minutes = totalMinutes % 60;</b>
+&nbsp;
+<b class="nc">&nbsp;        return String.format(&quot;%02d:%02d&quot;, hours, minutes);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String calculateAverageTotalNPTHrs(List&lt;ActivityLogEntry&gt; activityLogEntries,
+&nbsp;                                               List&lt;WellDetails&gt; wells,
+&nbsp;                                               long days) {
+&nbsp;
+<b class="nc">&nbsp;        if (activityLogEntries == null || activityLogEntries.isEmpty() || days == 0) {</b>
+<b class="nc">&nbsp;            return &quot;00:00&quot;;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ActivityLogEntry&gt; nptEntries = activityLogEntries.stream()</b>
+<b class="nc">&nbsp;                .filter(l -&gt; l.getOpsActivity() != null &amp;&amp;</b>
+<b class="nc">&nbsp;                        l.getOpsActivity().toUpperCase().contains(&quot;NPT&quot;))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;
+<b class="nc">&nbsp;        if (nptEntries.isEmpty()) {</b>
+<b class="nc">&nbsp;            return &quot;00:00&quot;;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, List&lt;ActivityLogEntry&gt;&gt; logsByWell = nptEntries.stream()</b>
+<b class="nc">&nbsp;                .filter(l -&gt; l.getWell() != null)</b>
+<b class="nc">&nbsp;                .collect(Collectors.groupingBy(ActivityLogEntry::getWell));</b>
+&nbsp;
+<b class="nc">&nbsp;        long totalAvgMillisAcrossWells = 0L;</b>
+&nbsp;
+<b class="nc">&nbsp;        for (Map.Entry&lt;String, List&lt;ActivityLogEntry&gt;&gt; entry : logsByWell.entrySet()) {</b>
+<b class="nc">&nbsp;            long totalMillis = entry.getValue().stream()</b>
+<b class="nc">&nbsp;                    .mapToLong(ActivityLogEntry::getMillisecondsSpan)</b>
+<b class="nc">&nbsp;                    .sum();</b>
+<b class="nc">&nbsp;            long avgMillisPerDay = totalMillis / days;</b>
+<b class="nc">&nbsp;            totalAvgMillisAcrossWells += avgMillisPerDay;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        long overallAvgMillis = totalAvgMillisAcrossWells / wells.size();</b>
+&nbsp;
+<b class="nc">&nbsp;        long totalMinutes = overallAvgMillis / (1000 * 60);</b>
+<b class="nc">&nbsp;        long hours = totalMinutes / 60;</b>
+<b class="nc">&nbsp;        long minutes = totalMinutes % 60;</b>
+&nbsp;
+<b class="nc">&nbsp;        return String.format(&quot;%02d:%02d&quot;, hours, minutes);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String calculateAveragePumpTime(List&lt;ActivityLogEntry&gt; activityLogEntries, List&lt;WellDetails&gt; wells, long days) {
+<b class="nc">&nbsp;        if (activityLogEntries == null || activityLogEntries.isEmpty() || days == 0) {</b>
+<b class="nc">&nbsp;            return &quot;00:00&quot;;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ActivityLogEntry&gt; pumpTimeEntries = activityLogEntries.stream()</b>
+<b class="nc">&nbsp;                .filter(l -&gt; l.getEventOrNptCode() != null &amp;&amp; l.getEventOrNptCode().equalsIgnoreCase(&quot;Pump Time&quot;))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;
+<b class="nc">&nbsp;        if (pumpTimeEntries.isEmpty()) {</b>
+<b class="nc">&nbsp;            return &quot;00:00&quot;;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, List&lt;ActivityLogEntry&gt;&gt; logsByWell = pumpTimeEntries.stream()</b>
+<b class="nc">&nbsp;                .filter(l -&gt; l.getWell() != null)</b>
+<b class="nc">&nbsp;                .collect(Collectors.groupingBy(ActivityLogEntry::getWell));</b>
+&nbsp;
+<b class="nc">&nbsp;        long totalAvgMillisAcrossWells = 0L;</b>
+&nbsp;
+<b class="nc">&nbsp;        for (Map.Entry&lt;String, List&lt;ActivityLogEntry&gt;&gt; entry : logsByWell.entrySet()) {</b>
+<b class="nc">&nbsp;            long totalMillis = entry.getValue().stream()</b>
+<b class="nc">&nbsp;                    .mapToLong(ActivityLogEntry::getMillisecondsSpan)</b>
+<b class="nc">&nbsp;                    .sum();</b>
+<b class="nc">&nbsp;            long avgMillisPerDay = totalMillis / days;</b>
+<b class="nc">&nbsp;            totalAvgMillisAcrossWells += avgMillisPerDay;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        long overallAvgMillis = totalAvgMillisAcrossWells / wells.size();</b>
+&nbsp;
+<b class="nc">&nbsp;        long totalMinutes = overallAvgMillis / (1000 * 60);</b>
+<b class="nc">&nbsp;        long hours = totalMinutes / 60;</b>
+<b class="nc">&nbsp;        long minutes = totalMinutes % 60;</b>
+&nbsp;
+<b class="nc">&nbsp;        return String.format(&quot;%02d:%02d&quot;, hours, minutes);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private double calculateOverallAverageStagesPerDay(List&lt;ActivityLogEntry&gt; activityLogEntries, List&lt;WellDetails&gt; wells, long days) {
+<b class="nc">&nbsp;        double totalAveragePerWell = 0.0;</b>
+&nbsp;
+<b class="nc">&nbsp;        if (days == 0 || activityLogEntries == null || activityLogEntries.isEmpty() || wells == null || wells.isEmpty()) {</b>
+<b class="nc">&nbsp;            return totalAveragePerWell;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, List&lt;ActivityLogEntry&gt;&gt; logsByWell = activityLogEntries.stream()</b>
+<b class="nc">&nbsp;                .filter(l -&gt; l.getWell() != null &amp;&amp; Boolean.TRUE.equals(l.getComplete()))</b>
+<b class="nc">&nbsp;                .collect(Collectors.groupingBy(ActivityLogEntry::getWell));</b>
+&nbsp;
+<b class="nc">&nbsp;        for (Map.Entry&lt;String, List&lt;ActivityLogEntry&gt;&gt; entry : logsByWell.entrySet()) {</b>
+<b class="nc">&nbsp;            List&lt;ActivityLogEntry&gt; activityLogEntryList = entry.getValue();</b>
+<b class="nc">&nbsp;            totalAveragePerWell += (double) activityLogEntryList.size() / days;</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        return round(totalAveragePerWell / wells.size(), 2);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; getWellCompletionInformation(HttpServletRequest request, String jobId, String wellId) {
+&nbsp;        try {
+&nbsp;            // Call 1: Fetch Job (Secure)
+<b class="fc">&nbsp;            Optional&lt;Job&gt; jobOptional = getJobById(request, jobId);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (jobOptional.isEmpty()) {</b>
+<b class="nc">&nbsp;                return buildErrorResponse(&quot;NOT_FOUND&quot;, &quot;Job not found&quot;, HttpStatus.NOT_FOUND);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            Job job = jobOptional.get();</b>
+&nbsp;
+&nbsp;            // Assign organizationId from the Job
+<b class="nc">&nbsp;            String organizationId = job.getOrganizationId();</b>
+&nbsp;
+<b class="nc">&nbsp;            WellCompletionInformation info = new WellCompletionInformation();</b>
+&nbsp;
+&nbsp;            // OPTIMIZATION: Pass the &#39;job&#39; object directly, avoiding a 2nd DB call
+<b class="nc">&nbsp;            Well matchedWell = getWellFromJob(job, wellId);</b>
+&nbsp;
+<b class="nc">&nbsp;            info.setCleanTotals(getCleanTotals(organizationId, jobId, wellId));</b>
+<b class="nc">&nbsp;            info.setProppantPumped(getProppantPumpedInfo(organizationId, jobId, wellId, matchedWell));</b>
+<b class="nc">&nbsp;            info.setSummaryChart(getSummaryChartInfo(organizationId, jobId, wellId, matchedWell));</b>
+<b class="nc">&nbsp;            info.setPumpPerformance(getPumpPerformanceInfo(organizationId, jobId, wellId, matchedWell));</b>
+&nbsp;
+<b class="nc">&nbsp;            return ResponseEntity.ok(info);</b>
+&nbsp;
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="fc">&nbsp;            log.error(&quot;Unexpected error while fetching well completion information&quot;, e);</b>
+<b class="fc">&nbsp;            return buildErrorResponse(&quot;UNEXPECTED_ERROR&quot;, e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private double actualCleanVolumeForWell(String organizationId, String jobId, String wellId){
+<b class="nc">&nbsp;        double actualCleanVolume = 0;</b>
+<b class="nc">&nbsp;        Query chemicalStageQuery = new Query();</b>
+<b class="nc">&nbsp;        chemicalStageQuery.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;        chemicalStageQuery.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+<b class="nc">&nbsp;        chemicalStageQuery.addCriteria(Criteria.where(&quot;wellId&quot;).is(wellId));</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ChemicalStage&gt; chemicalStages =</b>
+<b class="nc">&nbsp;                mongoTemplate.find(chemicalStageQuery, ChemicalStage.class, &quot;chemical-stages&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        if(!ObjectUtils.isEmpty(chemicalStages)) {</b>
+<b class="nc">&nbsp;            for(ChemicalStage chemicalStage : chemicalStages) {</b>
+<b class="nc">&nbsp;                actualCleanVolume += round((chemicalStage.getCleanTotal()),2);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return actualCleanVolume;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private double designedCleanVolumeForWell(String organizationId, String jobId, String wellId){
+<b class="nc">&nbsp;        Query query = new Query();</b>
+<b class="nc">&nbsp;        query.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+<b class="nc">&nbsp;        query.addCriteria(Criteria.where(&quot;wellId&quot;).is(wellId));</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;PumpSchedule&gt; pumpSchedules =</b>
+<b class="nc">&nbsp;                mongoTemplate.find(query, PumpSchedule.class, &quot;pump-schedules&quot;);</b>
+<b class="nc">&nbsp;        double designedCleanVolume = 0;</b>
+<b class="nc">&nbsp;        if(!ObjectUtils.isEmpty(pumpSchedules)) {</b>
+<b class="nc">&nbsp;            for(PumpSchedule pumpSchedule : pumpSchedules) {</b>
+<b class="nc">&nbsp;                designedCleanVolume += round((pumpSchedule.getCleanVol()),2);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return designedCleanVolume;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // OPTIMIZED METHOD: Uses the existing Job object
+&nbsp;    private Well getWellFromJob(Job job, String wellId){
+<b class="nc">&nbsp;        if (job == null || job.getWells() == null) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return job.getWells()</b>
+<b class="nc">&nbsp;                .stream()</b>
+<b class="nc">&nbsp;                .filter(w -&gt; w.getId().equals(wellId))</b>
+<b class="nc">&nbsp;                .findFirst()</b>
+<b class="nc">&nbsp;                .orElse(null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private double proppantUsedByWell(String organizationId, String jobId, Well well){
+<b class="nc">&nbsp;        double amount = 0;</b>
+<b class="nc">&nbsp;        Query query = new Query();</b>
+<b class="nc">&nbsp;        query.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;        query.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+<b class="nc">&nbsp;        query.addCriteria(</b>
+<b class="nc">&nbsp;                Criteria.where(&quot;usedIn&quot;).elemMatch(</b>
+<b class="nc">&nbsp;                        Criteria.where(&quot;well&quot;).is(well.getName())</b>
+&nbsp;                )
+&nbsp;        );
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ProppantDeliveryEntryDto&gt; deliveryEntries =</b>
+<b class="nc">&nbsp;                mongoTemplate.find(query, ProppantDeliveryEntryDto.class, &quot;proppant-delivery-entries&quot;);</b>
+<b class="nc">&nbsp;        for (ProppantDeliveryEntryDto each : deliveryEntries) {</b>
+<b class="nc">&nbsp;            if (each.getUsedIn() == null) continue;</b>
+<b class="nc">&nbsp;            for (IMaterialUsed used : each.getUsedIn()) {</b>
+<b class="nc">&nbsp;                if(used.getWell().equals(well.getName())) {</b>
+<b class="nc">&nbsp;                    amount += used.getSubmittedAmount();</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        return round(amount, 2);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private CleanTotals getCleanTotals(String organizationId, String jobId, String wellId) {
+<b class="nc">&nbsp;        CleanTotals cleanTotals = new CleanTotals();</b>
+&nbsp;
+<b class="nc">&nbsp;        cleanTotals.setDesignedCleanVolume(</b>
+<b class="nc">&nbsp;                round(designedCleanVolumeForWell(organizationId, jobId, wellId), 2)</b>
+&nbsp;        );
+&nbsp;
+<b class="nc">&nbsp;        cleanTotals.setActualCleanVolume(</b>
+<b class="nc">&nbsp;                round(actualCleanVolumeForWell(organizationId, jobId, wellId), 2)</b>
+&nbsp;        );
+&nbsp;
+<b class="nc">&nbsp;        return cleanTotals;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private ProppantPumped getProppantPumpedInfo(String organizationId, String jobId, String wellId, Well matchedWell) {
+<b class="nc">&nbsp;        ProppantPumped proppantPumped = new ProppantPumped();</b>
+<b class="nc">&nbsp;        double designed = 0;</b>
+<b class="nc">&nbsp;        double actual = 0;</b>
+&nbsp;
+<b class="nc">&nbsp;        Query query = new Query();</b>
+<b class="nc">&nbsp;        query.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;        query.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+<b class="nc">&nbsp;        query.addCriteria(Criteria.where(&quot;wellId&quot;).is(matchedWell.getId()));</b>
+<b class="nc">&nbsp;        List&lt;ProppantStage&gt; proppantStages =</b>
+<b class="nc">&nbsp;                mongoTemplate.find(query, ProppantStage.class, &quot;proppant-stages&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        int size = proppantStages == null ? 0 :</b>
+<b class="nc">&nbsp;                proppantStages.stream()</b>
+<b class="nc">&nbsp;                        .map(ProppantStage::getStage)</b>
+<b class="nc">&nbsp;                        .collect(Collectors.toSet())</b>
+<b class="nc">&nbsp;                        .size();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (!ObjectUtils.isEmpty(matchedWell)) {</b>
+<b class="nc">&nbsp;            if (!ObjectUtils.isEmpty(matchedWell.getProppants())) {</b>
+<b class="nc">&nbsp;                for (Proppant proppant : matchedWell.getProppants()) {</b>
+<b class="nc">&nbsp;                    Float proppantVolumePerStage = proppant.getVolumePerStage();</b>
+<b class="nc">&nbsp;                    if(proppantVolumePerStage == null) { proppantVolumePerStage = 0.0f; }</b>
+<b class="nc">&nbsp;                    designed += proppantVolumePerStage;</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+<b class="nc">&nbsp;            actual = proppantUsedByWell(organizationId, jobId, matchedWell);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        proppantPumped.setDesignedProppantPumped(round(designed * size, 2));</b>
+<b class="nc">&nbsp;        proppantPumped.setActualProppantPumped(round(actual, 2));</b>
+&nbsp;
+<b class="nc">&nbsp;        return proppantPumped;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private SummaryChart getSummaryChartInfo(String organizationId, String jobId, String wellId, Well matchedWell) {
+&nbsp;
+<b class="nc">&nbsp;        SummaryChart summary = new SummaryChart();</b>
+<b class="nc">&nbsp;        TotalPropAndClean total = new TotalPropAndClean();</b>
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;String, ChemicalValue&gt; chemicalValues = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (!ObjectUtils.isEmpty(matchedWell)) {</b>
+&nbsp;
+<b class="nc">&nbsp;            Query query = new Query();</b>
+<b class="nc">&nbsp;            query.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;            query.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+<b class="nc">&nbsp;            query.addCriteria(Criteria.where(&quot;usedIn&quot;)</b>
+<b class="nc">&nbsp;                    .elemMatch(Criteria.where(&quot;well&quot;).is(matchedWell.getName())));</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;ChemicalDeliveryEntry&gt; chemicalEntries =</b>
+<b class="nc">&nbsp;                    mongoTemplate.find(query, ChemicalDeliveryEntry.class, &quot;chemical-delivery-entries&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;ChemicalDeliveryEntry&gt; validEntries = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;            for (ChemicalDeliveryEntry entry : chemicalEntries) {</b>
+<b class="nc">&nbsp;                if (!(entry.getTransferredFromJobId() != null &amp;&amp; !entry.getStatus().equals(&quot;accepted&quot;))) {</b>
+<b class="nc">&nbsp;                    validEntries.add(entry);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            for (ChemicalDeliveryEntry each : validEntries) {</b>
+<b class="nc">&nbsp;                double amount = 0;</b>
+<b class="nc">&nbsp;                String chemicalName = each.getChemical();</b>
+<b class="nc">&nbsp;                String uom = each.getUom();</b>
+&nbsp;
+<b class="nc">&nbsp;                for (ChemicalUsed used : each.getUsedIn()) {</b>
+<b class="nc">&nbsp;                    if(used.getWell().equals(matchedWell.getName())) {</b>
+<b class="nc">&nbsp;                        amount += used.getSubmittedAmount();</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;
+<b class="nc">&nbsp;                double roundedAmount = round(amount, 2);</b>
+&nbsp;
+&nbsp;                // Merge values if chemical already exists
+<b class="nc">&nbsp;                if (chemicalValues.containsKey(chemicalName))</b>
+&nbsp;                {
+<b class="nc">&nbsp;                    ChemicalValue existing = chemicalValues.get(chemicalName);</b>
+<b class="nc">&nbsp;                    existing.setValue(existing.getValue() + roundedAmount);</b>
+<b class="nc">&nbsp;                }</b>
+<b class="nc">&nbsp;                else { chemicalValues.put(chemicalName, new ChemicalValue(roundedAmount, uom)); }</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;        }
+<b class="nc">&nbsp;        summary.setChemicalValues(chemicalValues);</b>
+&nbsp;
+<b class="nc">&nbsp;        total.setCleanVolume(</b>
+<b class="nc">&nbsp;                round((actualCleanVolumeForWell(organizationId, jobId, wellId) * 42), 2)</b>
+&nbsp;        );
+&nbsp;
+<b class="nc">&nbsp;        total.setProppantPumped(</b>
+<b class="nc">&nbsp;                round(proppantUsedByWell(organizationId, jobId, matchedWell), 2)</b>
+&nbsp;        );
+&nbsp;
+<b class="nc">&nbsp;        summary.setTotalPropAndClean(total);</b>
+<b class="nc">&nbsp;        return summary;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private PumpPerformance getPumpPerformanceInfo(String organizationId, String jobId, String wellId, Well matchedWell) {
+&nbsp;
+<b class="nc">&nbsp;        PumpPerformance pumpPerformance = new PumpPerformance();</b>
+&nbsp;
+<b class="nc">&nbsp;        Query ChemicalStageQuery = new Query();</b>
+<b class="nc">&nbsp;        ChemicalStageQuery.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;        ChemicalStageQuery.addCriteria(Criteria.where(&quot;wellId&quot;).is(wellId));</b>
+<b class="nc">&nbsp;        ChemicalStageQuery.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+<b class="nc">&nbsp;        List&lt;ChemicalStage&gt; chemicalStages = mongoTemplate.find(ChemicalStageQuery, ChemicalStage.class, &quot;chemical-stages&quot;);</b>
+&nbsp;
+&nbsp;        // Fetch well info from wells collection (required to get FracPro ID)
+<b class="nc">&nbsp;        Query wellQuery = new Query();</b>
+<b class="nc">&nbsp;        wellQuery.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;        wellQuery.addCriteria(Criteria.where(&quot;_id&quot;).is(wellId));</b>
+<b class="nc">&nbsp;        Well wellFromDB = mongoTemplate.findOne(wellQuery, Well.class, &quot;wells&quot;);</b>
+&nbsp;
+&nbsp;        // Fetch pump time
+<b class="nc">&nbsp;        Query activityLogQuery = new Query();</b>
+<b class="nc">&nbsp;        activityLogQuery.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;        activityLogQuery.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+<b class="nc">&nbsp;        activityLogQuery.addCriteria(Criteria.where(&quot;well&quot;).is(matchedWell != null ? matchedWell.getName() : &quot;&quot;));</b>
+<b class="nc">&nbsp;        activityLogQuery.addCriteria(Criteria.where(&quot;eventOrNptCode&quot;).is(&quot;Pump Time&quot;));</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;ActivityLogEntry&gt; logs =</b>
+<b class="nc">&nbsp;                mongoTemplate.find(activityLogQuery, ActivityLogEntry.class, &quot;activity-log-entries&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;Float, List&lt;ActivityLogEntry&gt;&gt; activityLogMap = logs.stream()</b>
+<b class="nc">&nbsp;                .collect(Collectors.groupingBy(ActivityLogEntry::getStage));</b>
+&nbsp;
+<b class="nc">&nbsp;        int fracproId = wellFromDB != null ? wellFromDB.getFracproId() : 0;</b>
+&nbsp;
+<b class="nc">&nbsp;        Client client = ClientBuilder.newClient();</b>
+<b class="nc">&nbsp;        String token = aiCallsService.retrieveFracproAuthToken();</b>
+<b class="nc">&nbsp;        List&lt;FracProTreatmentId&gt; treatmentIds =</b>
+<b class="nc">&nbsp;                aiCallsService.getFracProTreatmentsListForCurWellDirect(fracproId, token, client);</b>
+&nbsp;
+<b class="nc">&nbsp;        Map&lt;Integer, FracProTreatment&gt; map = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        if (!ObjectUtils.isEmpty(treatmentIds)) {</b>
+<b class="nc">&nbsp;            map = aiCallsService.getAllFracproTreatmentsDirect(fracproId, treatmentIds, token);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        List&lt;Float&gt; avgPresList = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;Float&gt; maxPresList = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;Float&gt; avgRateList = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;Float&gt; maxRateList = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        List&lt;Float&gt; pumptimeList = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        for (ChemicalStage chemicalStage : chemicalStages) {</b>
+<b class="nc">&nbsp;            Integer stage = chemicalStage != null &amp;&amp; chemicalStage.getStage() != null</b>
+<b class="nc">&nbsp;                    ? chemicalStage.getStage().intValue()</b>
+<b class="nc">&nbsp;                    : null;</b>
+&nbsp;
+<b class="nc">&nbsp;            FracProTreatment treatment = stage != null ? map.get(stage) : null;</b>
+<b class="nc">&nbsp;            List&lt;ActivityLogEntry&gt; activityLogEntries = stage != null ? activityLogMap.get(chemicalStage.getStage()) : null;</b>
+&nbsp;
+<b class="nc">&nbsp;            avgPresList.add(</b>
+<b class="nc">&nbsp;                    treatment != null &amp;&amp; treatment.getAveragePres() != null</b>
+<b class="nc">&nbsp;                            ? treatment.getAveragePres()</b>
+<b class="nc">&nbsp;                            : 0.0f</b>
+&nbsp;            );
+&nbsp;
+<b class="nc">&nbsp;            maxPresList.add(</b>
+<b class="nc">&nbsp;                    treatment != null &amp;&amp; treatment.getMaxPres() != null</b>
+<b class="nc">&nbsp;                            ? treatment.getMaxPres()</b>
+<b class="nc">&nbsp;                            : 0.0f</b>
+&nbsp;            );
+&nbsp;
+<b class="nc">&nbsp;            avgRateList.add(</b>
+<b class="nc">&nbsp;                    treatment != null &amp;&amp; treatment.getAvgSlurryReturnRate() != null</b>
+<b class="nc">&nbsp;                            ? treatment.getAvgSlurryReturnRate()</b>
+<b class="nc">&nbsp;                            : 0.0f</b>
+&nbsp;            );
+&nbsp;
+<b class="nc">&nbsp;            maxRateList.add(</b>
+<b class="nc">&nbsp;                    treatment != null &amp;&amp; treatment.getMaxFluidRate() != null</b>
+<b class="nc">&nbsp;                            ? treatment.getMaxFluidRate()</b>
+<b class="nc">&nbsp;                            : 0.0f</b>
+&nbsp;            );
+&nbsp;
+<b class="nc">&nbsp;            Float pumpTime = (activityLogEntries != null)</b>
+<b class="nc">&nbsp;                    ? ActivityLogUtil.getTotalPumpTimeInMins(activityLogEntries)</b>
+<b class="nc">&nbsp;                    : 0.0f;</b>
+&nbsp;
+<b class="nc">&nbsp;            pumptimeList.add(pumpTime);</b>
+<b class="nc">&nbsp;        }</b>
+&nbsp;
+<b class="nc">&nbsp;        pumpPerformance.setPumpTime(pumptimeList);</b>
+<b class="nc">&nbsp;        pumpPerformance.setAveragePressure(avgPresList);</b>
+<b class="nc">&nbsp;        pumpPerformance.setMaxPressure(maxPresList);</b>
+<b class="nc">&nbsp;        pumpPerformance.setAverageRate(avgRateList);</b>
+<b class="nc">&nbsp;        pumpPerformance.setMaxRate(maxRateList);</b>
+&nbsp;
+<b class="nc">&nbsp;        return pumpPerformance;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; getCleanPerStage(HttpServletRequest request, String jobId, String wellId) {
+&nbsp;        try {
+&nbsp;            // Call 1: Fetch Job
+<b class="fc">&nbsp;            Optional&lt;Job&gt; jobOptional = getJobById(request, jobId);</b>
+<b class="nc">&nbsp;            if (jobOptional.isEmpty()) {</b>
+<b class="nc">&nbsp;                return buildErrorResponse(&quot;NOT_FOUND&quot;, &quot;Job not found&quot;, HttpStatus.NOT_FOUND);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            Job job = jobOptional.get();</b>
+<b class="nc">&nbsp;            String organizationId = job.getOrganizationId();</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;CleanPerStageResponse&gt; responses = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;            Query query = new Query();</b>
+<b class="nc">&nbsp;            query.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;            query.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+<b class="nc">&nbsp;            query.addCriteria(Criteria.where(&quot;wellId&quot;).is(wellId));</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;ChemicalStage&gt; stages =</b>
+<b class="nc">&nbsp;                    mongoTemplate.find(query, ChemicalStage.class, &quot;chemical-stages&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (stages == null || stages.isEmpty()) {</b>
+<b class="nc">&nbsp;                return ResponseEntity.ok(responses);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            Map&lt;Float, Float&gt; stageToCleanMap = stages.stream()</b>
+<b class="nc">&nbsp;                    .collect(Collectors.toMap(</b>
+&nbsp;                            ChemicalStage::getStage,
+&nbsp;                            ChemicalStage::getCleanTotal,
+<b class="nc">&nbsp;                            (a, b) -&gt; b</b>
+&nbsp;                    ));
+&nbsp;
+<b class="nc">&nbsp;            Float maxStage = stages.stream()</b>
+<b class="nc">&nbsp;                    .map(ChemicalStage::getStage)</b>
+<b class="nc">&nbsp;                    .max(Float::compare)</b>
+<b class="nc">&nbsp;                    .orElse(0.0f);</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;Float&gt; allStages = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            for (float s = 1.0f; s &lt;= maxStage; s += 1.0f) {</b>
+<b class="nc">&nbsp;                allStages.add(s);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            for (Float stage : allStages) {</b>
+<b class="nc">&nbsp;                Float cleanTotal = stageToCleanMap.getOrDefault(stage, 0.0f);</b>
+&nbsp;
+<b class="nc">&nbsp;                CleanPerStageResponse resp = new CleanPerStageResponse();</b>
+<b class="nc">&nbsp;                resp.setStageNumber(stage);</b>
+<b class="nc">&nbsp;                resp.setTotalCleanBbls(cleanTotal);</b>
+&nbsp;
+<b class="nc">&nbsp;                responses.add(resp);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            return ResponseEntity.ok(responses);</b>
+&nbsp;
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="fc">&nbsp;            log.error(&quot;Unexpected error while fetching total clean per stage&quot;, e);</b>
+<b class="fc">&nbsp;            return buildErrorResponse(&quot;UNEXPECTED_ERROR&quot;, e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; getAveragePressureAndRate(HttpServletRequest request, String jobId, String wellId) {
+&nbsp;        try{
+&nbsp;            // Call 1: Fetch Job
+<b class="fc">&nbsp;            Optional&lt;Job&gt; jobOptional = getJobById(request, jobId);</b>
+<b class="nc">&nbsp;            if (jobOptional.isEmpty()) {</b>
+<b class="nc">&nbsp;                return buildErrorResponse(&quot;NOT_FOUND&quot;, &quot;Job not found&quot;, HttpStatus.NOT_FOUND);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            Job job = jobOptional.get();</b>
+<b class="nc">&nbsp;            String organizationId = job.getOrganizationId();</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;AveragePressureAndRateResponse&gt; averagePressureAndRateResponses = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            Query wellQuery = new Query();</b>
+<b class="nc">&nbsp;            wellQuery.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;            wellQuery.addCriteria(Criteria.where(&quot;_id&quot;).is(wellId));</b>
+<b class="nc">&nbsp;            Well wellFromDB = mongoTemplate.findOne(wellQuery, Well.class, &quot;wells&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            Map&lt;String, String&gt; wellMap = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            wellMap.put(wellFromDB.getId(), wellFromDB.getName());</b>
+&nbsp;
+<b class="nc">&nbsp;            Query emailQuery = new Query();</b>
+<b class="nc">&nbsp;            emailQuery.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;            emailQuery.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+<b class="nc">&nbsp;            emailQuery.addCriteria(Criteria.where(&quot;type&quot;).is(&quot;END_STAGE&quot;));</b>
+<b class="nc">&nbsp;            emailQuery.addCriteria(</b>
+<b class="nc">&nbsp;                    new Criteria().orOperator(</b>
+<b class="nc">&nbsp;                            Criteria.where(&quot;well&quot;).is(wellId),</b>
+<b class="nc">&nbsp;                            Criteria.where(&quot;well&quot;).is(wellFromDB.getName())</b>
+&nbsp;                    )
+&nbsp;            );
+<b class="nc">&nbsp;            List&lt;EndStageEmailPayload&gt; endStageEmails = mongoTemplate.find(emailQuery, EndStageEmailPayload.class, &quot;emails&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            Map&lt;String, EndStageEmailPayload&gt; latestEmailsMap = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            if (endStageEmails != null &amp;&amp; !endStageEmails.isEmpty()) {</b>
+<b class="nc">&nbsp;                for (EndStageEmailPayload email : endStageEmails) {</b>
+&nbsp;                    String key;
+<b class="nc">&nbsp;                    String wellName = email.getWell();</b>
+<b class="nc">&nbsp;                    if (!ObjectUtils.isEmpty(wellMap.get(wellName))) {</b>
+<b class="nc">&nbsp;                        key = wellMap.get(wellName) + &quot;-&quot; + email.getStage();</b>
+&nbsp;                    } else {
+<b class="nc">&nbsp;                        key = wellName + &quot;-&quot; + email.getStage();</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    EndStageEmailPayload existing = latestEmailsMap.get(key);</b>
+<b class="nc">&nbsp;                    if (existing == null || email.getCreated() &gt; existing.getCreated()) {</b>
+<b class="nc">&nbsp;                        latestEmailsMap.put(key, email);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            List&lt;EndStageEmailPayload&gt; latestEndStageEmails = new ArrayList&lt;&gt;(latestEmailsMap.values());</b>
+&nbsp;
+<b class="nc">&nbsp;            for(EndStageEmailPayload endStageEmailPayload : latestEndStageEmails){</b>
+<b class="nc">&nbsp;                AveragePressureAndRateResponse averagePressureAndRateResponse = new AveragePressureAndRateResponse();</b>
+&nbsp;
+<b class="nc">&nbsp;                averagePressureAndRateResponse.setStageNumber(Float.valueOf(endStageEmailPayload.getStage()));</b>
+<b class="nc">&nbsp;                averagePressureAndRateResponse.setAveragePressure(endStageEmailPayload.getAveragePressure());</b>
+<b class="nc">&nbsp;                averagePressureAndRateResponse.setAverageRate(endStageEmailPayload.getAverageRate());</b>
+&nbsp;
+<b class="nc">&nbsp;                averagePressureAndRateResponses.add(averagePressureAndRateResponse);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            averagePressureAndRateResponses = averagePressureAndRateResponses.stream()</b>
+<b class="nc">&nbsp;                    .sorted(Comparator.comparing(AveragePressureAndRateResponse::getStageNumber))</b>
+<b class="nc">&nbsp;                    .collect(Collectors.toList());</b>
+&nbsp;
+<b class="nc">&nbsp;            return ResponseEntity.ok(averagePressureAndRateResponses);</b>
+&nbsp;
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="fc">&nbsp;            log.error(&quot;Unexpected error while fetching Average pressure and rate&quot;, e);</b>
+<b class="fc">&nbsp;            return buildErrorResponse(&quot;UNEXPECTED_ERROR&quot;, e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; getFinalISIPAndFG(HttpServletRequest request, String jobId, String wellId) {
+&nbsp;        try{
+&nbsp;            // Call 1: Fetch Job
+<b class="fc">&nbsp;            Optional&lt;Job&gt; jobOptional = getJobById(request, jobId);</b>
+<b class="nc">&nbsp;            if (jobOptional.isEmpty()) {</b>
+<b class="nc">&nbsp;                return buildErrorResponse(&quot;NOT_FOUND&quot;, &quot;Job not found&quot;, HttpStatus.NOT_FOUND);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            Job job = jobOptional.get();</b>
+<b class="nc">&nbsp;            String organizationId = job.getOrganizationId();</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;FinalISIPAndFGResponse&gt; finalISIPAndFGResponses = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;            Query wellQuery = new Query();</b>
+<b class="nc">&nbsp;            wellQuery.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;            wellQuery.addCriteria(Criteria.where(&quot;_id&quot;).is(wellId));</b>
+<b class="nc">&nbsp;            Well wellFromDB = mongoTemplate.findOne(wellQuery, Well.class, &quot;wells&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            int fracproId = wellFromDB != null ? wellFromDB.getFracproId() : 0;</b>
+&nbsp;
+<b class="nc">&nbsp;            Client client = ClientBuilder.newClient();</b>
+<b class="nc">&nbsp;            String token = aiCallsService.retrieveFracproAuthToken();</b>
+<b class="nc">&nbsp;            List&lt;FracProTreatmentId&gt; treatmentIds =</b>
+<b class="nc">&nbsp;                    aiCallsService.getFracProTreatmentsListForCurWellDirect(fracproId, token, client);</b>
+&nbsp;
+<b class="nc">&nbsp;            Map&lt;Integer, FracProTreatment&gt; map = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;            if (!ObjectUtils.isEmpty(treatmentIds)) {</b>
+<b class="nc">&nbsp;                map = aiCallsService.getAllFracproTreatmentsDirect(fracproId, treatmentIds, token);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            Query ChemicalStageQuery = new Query();</b>
+<b class="nc">&nbsp;            ChemicalStageQuery.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;            ChemicalStageQuery.addCriteria(Criteria.where(&quot;wellId&quot;).is(wellId));</b>
+<b class="nc">&nbsp;            ChemicalStageQuery.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+<b class="nc">&nbsp;            List&lt;ChemicalStage&gt; chemicalStages = mongoTemplate.find(ChemicalStageQuery, ChemicalStage.class, &quot;chemical-stages&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            for (ChemicalStage chemicalStage : chemicalStages) {</b>
+<b class="nc">&nbsp;                FracProTreatment treatment = map.get(chemicalStage.getStage().intValue());</b>
+<b class="nc">&nbsp;                FinalISIPAndFGResponse finalISIPAndFGResponse = new FinalISIPAndFGResponse();</b>
+<b class="nc">&nbsp;                finalISIPAndFGResponse.setStageNumber(chemicalStage.getStage());</b>
+<b class="nc">&nbsp;                if(treatment != null){</b>
+<b class="nc">&nbsp;                    finalISIPAndFGResponse.setFinalISIP(round(treatment.getInitialShutinPres(), 2));</b>
+<b class="nc">&nbsp;                    finalISIPAndFGResponse.setFracGradient(round(treatment.getFractureGradient(), 2));</b>
+&nbsp;                } else{
+<b class="nc">&nbsp;                    finalISIPAndFGResponse.setFinalISIP(0.0f);</b>
+<b class="nc">&nbsp;                    finalISIPAndFGResponse.setFracGradient(0.0f);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                finalISIPAndFGResponses.add(finalISIPAndFGResponse);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            finalISIPAndFGResponses = finalISIPAndFGResponses.stream()</b>
+<b class="nc">&nbsp;                    .sorted(Comparator.comparing(FinalISIPAndFGResponse::getStageNumber))</b>
+<b class="nc">&nbsp;                    .collect(Collectors.toList());</b>
+&nbsp;
+<b class="nc">&nbsp;            return ResponseEntity.ok(finalISIPAndFGResponses);</b>
+&nbsp;
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="fc">&nbsp;            log.error(&quot;Unexpected error while fetching final ISIP and FG&quot;, e);</b>
+<b class="fc">&nbsp;            return buildErrorResponse(&quot;UNEXPECTED_ERROR&quot;, e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public ResponseEntity&lt;?&gt; getAverageVsMax(HttpServletRequest request, String jobId, String wellId) {
+&nbsp;        try{
+&nbsp;            // Call 1: Fetch Job
+<b class="fc">&nbsp;            Optional&lt;Job&gt; jobOptional = getJobById(request, jobId);</b>
+<b class="nc">&nbsp;            if (jobOptional.isEmpty()) {</b>
+<b class="nc">&nbsp;                return buildErrorResponse(&quot;NOT_FOUND&quot;, &quot;Job not found&quot;, HttpStatus.NOT_FOUND);</b>
+&nbsp;            }
+<b class="nc">&nbsp;            Job job = jobOptional.get();</b>
+<b class="nc">&nbsp;            String organizationId = job.getOrganizationId();</b>
+&nbsp;
+<b class="nc">&nbsp;            List&lt;AverageVsMaxResponse&gt; averageVsMaxResponses = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;            Query wellQuery = new Query();</b>
+<b class="nc">&nbsp;            wellQuery.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;            wellQuery.addCriteria(Criteria.where(&quot;_id&quot;).is(wellId));</b>
+<b class="nc">&nbsp;            Well wellFromDB = mongoTemplate.findOne(wellQuery, Well.class, &quot;wells&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            Map&lt;String, String&gt; wellMap = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            wellMap.put(wellFromDB.getId(), wellFromDB.getName());</b>
+&nbsp;
+<b class="nc">&nbsp;            Query emailQuery = new Query();</b>
+<b class="nc">&nbsp;            emailQuery.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;            emailQuery.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+<b class="nc">&nbsp;            emailQuery.addCriteria(Criteria.where(&quot;type&quot;).is(&quot;END_STAGE&quot;));</b>
+<b class="nc">&nbsp;            emailQuery.addCriteria(</b>
+<b class="nc">&nbsp;                    new Criteria().orOperator(</b>
+<b class="nc">&nbsp;                            Criteria.where(&quot;well&quot;).is(wellId),</b>
+<b class="nc">&nbsp;                            Criteria.where(&quot;well&quot;).is(wellFromDB.getName())</b>
+&nbsp;                    )
+&nbsp;            );
+<b class="nc">&nbsp;            List&lt;EndStageEmailPayload&gt; endStageEmails = mongoTemplate.find(emailQuery, EndStageEmailPayload.class, &quot;emails&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            Query ChemicalStageQuery = new Query();</b>
+<b class="nc">&nbsp;            ChemicalStageQuery.addCriteria(Criteria.where(&quot;organizationId&quot;).is(organizationId));</b>
+<b class="nc">&nbsp;            ChemicalStageQuery.addCriteria(Criteria.where(&quot;wellId&quot;).is(wellId));</b>
+<b class="nc">&nbsp;            ChemicalStageQuery.addCriteria(Criteria.where(&quot;jobId&quot;).is(jobId));</b>
+<b class="nc">&nbsp;            List&lt;ChemicalStage&gt; chemicalStages = mongoTemplate.find(ChemicalStageQuery, ChemicalStage.class, &quot;chemical-stages&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;            Map&lt;String, EndStageEmailPayload&gt; latestEmailsMap = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            if (endStageEmails != null &amp;&amp; !endStageEmails.isEmpty()) {</b>
+<b class="nc">&nbsp;                for (EndStageEmailPayload email : endStageEmails) {</b>
+&nbsp;                    String key;
+<b class="nc">&nbsp;                    String wellName = email.getWell();</b>
+<b class="nc">&nbsp;                    if (!ObjectUtils.isEmpty(wellMap.get(wellName))) {</b>
+<b class="nc">&nbsp;                        key = wellMap.get(wellName) + &quot;-&quot; + email.getStage();</b>
+&nbsp;                    } else {
+<b class="nc">&nbsp;                        key = wellName + &quot;-&quot; + email.getStage();</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                    EndStageEmailPayload existing = latestEmailsMap.get(key);</b>
+<b class="nc">&nbsp;                    if (existing == null || email.getCreated() &gt; existing.getCreated()) {</b>
+<b class="nc">&nbsp;                        latestEmailsMap.put(key, email);</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            List&lt;EndStageEmailPayload&gt; latestEndStageEmails = new ArrayList&lt;&gt;(latestEmailsMap.values());</b>
+&nbsp;
+<b class="nc">&nbsp;            Map&lt;Float, EndStageEmailPayload&gt; latestEmailStageMap = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;            for (EndStageEmailPayload email : latestEndStageEmails) {</b>
+&nbsp;
+<b class="nc">&nbsp;                Float stage = Float.valueOf(email.getStage());</b>
+&nbsp;
+<b class="nc">&nbsp;                EndStageEmailPayload existing = latestEmailStageMap.get(stage);</b>
+&nbsp;
+<b class="nc">&nbsp;                if (existing == null || email.getCreated() &gt; existing.getCreated()) {</b>
+<b class="nc">&nbsp;                    latestEmailStageMap.put(stage, email);</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            int fracproId = wellFromDB != null ? wellFromDB.getFracproId() : 0;</b>
+&nbsp;
+<b class="nc">&nbsp;            Client client = ClientBuilder.newClient();</b>
+<b class="nc">&nbsp;            String token = aiCallsService.retrieveFracproAuthToken();</b>
+<b class="nc">&nbsp;            List&lt;FracProTreatmentId&gt; treatmentIds =</b>
+<b class="nc">&nbsp;                    aiCallsService.getFracProTreatmentsListForCurWellDirect(fracproId, token, client);</b>
+&nbsp;
+<b class="nc">&nbsp;            Map&lt;Integer, FracProTreatment&gt; map = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;            if (!ObjectUtils.isEmpty(treatmentIds)) {</b>
+<b class="nc">&nbsp;                map = aiCallsService.getAllFracproTreatmentsDirect(fracproId, treatmentIds, token);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            Map&lt;Float, FracProTreatment&gt; maxValuesMap = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            for (ChemicalStage chemicalStage : chemicalStages) {</b>
+<b class="nc">&nbsp;                Float stage = (chemicalStage != null &amp;&amp; chemicalStage.getStage() != null)</b>
+<b class="nc">&nbsp;                        ? chemicalStage.getStage()</b>
+<b class="nc">&nbsp;                        : null;</b>
+&nbsp;
+<b class="nc">&nbsp;                if (stage == null) {</b>
+<b class="nc">&nbsp;                    continue;</b>
+&nbsp;                }
+&nbsp;
+<b class="nc">&nbsp;                FracProTreatment treatment = map.get(chemicalStage.getStage().intValue());</b>
+&nbsp;
+<b class="nc">&nbsp;                if (treatment == null) {</b>
+<b class="nc">&nbsp;                    continue;</b>
+&nbsp;                }
+<b class="nc">&nbsp;                maxValuesMap.put(stage, treatment);</b>
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            Float maxStage = 0f;</b>
+&nbsp;
+<b class="nc">&nbsp;            if (!latestEmailStageMap.isEmpty()) {</b>
+<b class="nc">&nbsp;                maxStage = Math.max(maxStage,</b>
+<b class="nc">&nbsp;                        latestEmailStageMap.keySet().stream().max(Float::compare).orElse(0f));</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            if (!maxValuesMap.isEmpty()) {</b>
+<b class="nc">&nbsp;                maxStage = Math.max(maxStage,</b>
+<b class="nc">&nbsp;                        maxValuesMap.keySet().stream().max(Float::compare).orElse(0f));</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            for (float stage = 1f; stage &lt;= maxStage; stage++) {</b>
+&nbsp;
+<b class="nc">&nbsp;                AverageVsMaxResponse resp = new AverageVsMaxResponse();</b>
+<b class="nc">&nbsp;                resp.setStageNumber(stage);</b>
+&nbsp;
+&nbsp;                // From latest email
+<b class="nc">&nbsp;                EndStageEmailPayload email = latestEmailStageMap.get(stage);</b>
+<b class="nc">&nbsp;                if (email != null) {</b>
+<b class="nc">&nbsp;                    resp.setAveragePressure(email.getAveragePressure());</b>
+<b class="nc">&nbsp;                    resp.setAverageRate(email.getAverageRate());</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    resp.setAveragePressure(0f);</b>
+<b class="nc">&nbsp;                    resp.setAverageRate(0f);</b>
+&nbsp;                }
+&nbsp;
+&nbsp;                // From FracPro
+<b class="nc">&nbsp;                FracProTreatment t = maxValuesMap.get(stage);</b>
+<b class="nc">&nbsp;                if (t != null) {</b>
+<b class="nc">&nbsp;                    resp.setMaxPressure(t.getMaxPres());</b>
+<b class="nc">&nbsp;                    resp.setMaxRate(t.getMaxFluidRate());</b>
+&nbsp;                } else {
+<b class="nc">&nbsp;                    resp.setMaxPressure(0f);</b>
+<b class="nc">&nbsp;                    resp.setMaxRate(0f);</b>
+&nbsp;                }
+&nbsp;
+<b class="nc">&nbsp;                averageVsMaxResponses.add(resp);</b>
+&nbsp;            }
+&nbsp;
+<b class="nc">&nbsp;            averageVsMaxResponses = averageVsMaxResponses.stream()</b>
+<b class="nc">&nbsp;                    .sorted(Comparator.comparing(AverageVsMaxResponse::getStageNumber))</b>
+<b class="nc">&nbsp;                    .collect(Collectors.toList());</b>
+&nbsp;
+&nbsp;
+<b class="nc">&nbsp;            return ResponseEntity.ok(averageVsMaxResponses);</b>
+&nbsp;
+<b class="fc">&nbsp;        } catch (Exception e) {</b>
+<b class="fc">&nbsp;            log.error(&quot;Unexpected error while fetching average vs max&quot;, e);</b>
+<b class="fc">&nbsp;            return buildErrorResponse(&quot;UNEXPECTED_ERROR&quot;, e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-04-27 10:39</div>
+</div>
+</body>
+</html>

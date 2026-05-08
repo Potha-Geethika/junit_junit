@@ -1,0 +1,222 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SyncController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.carbo.pad.controllers</a>
+</div>
+
+<h1>Coverage Summary for Class: SyncController (com.carbo.pad.controllers)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SyncController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (2/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    8.5%
+  </span>
+  <span class="absValue">
+    (4/47)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.carbo.pad.controllers;
+&nbsp;
+&nbsp;import com.carbo.pad.model.Pad;
+&nbsp;import com.carbo.pad.model.SyncRequest;
+&nbsp;import com.carbo.pad.model.SyncResponse;
+&nbsp;import com.carbo.pad.services.PadService;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+&nbsp;import org.springframework.web.bind.annotation.RequestBody;
+&nbsp;import org.springframework.web.bind.annotation.RequestMapping;
+&nbsp;import org.springframework.web.bind.annotation.RequestMethod;
+&nbsp;import org.springframework.web.bind.annotation.RestController;
+&nbsp;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import java.security.Principal;
+&nbsp;import java.util.*;
+&nbsp;
+&nbsp;import static com.carbo.pad.utils.ControllerUtil.getOrganizationId;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(value = &quot;v1/sync&quot;)
+&nbsp;public class SyncController {
+<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(SyncController.class);</b>
+&nbsp;
+&nbsp;    private final PadService padService;
+&nbsp;
+&nbsp;    @Autowired
+<b class="fc">&nbsp;    public SyncController(PadService padService) {</b>
+<b class="fc">&nbsp;        this.padService = padService;</b>
+<b class="fc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    @RequestMapping(value = &quot;/view&quot;, method = RequestMethod.GET)
+&nbsp;    public Map&lt;String, Long&gt; view(HttpServletRequest request) {
+<b class="nc">&nbsp;        Map&lt;String, Long&gt; result = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;        String organizationId = getOrganizationId(request);</b>
+<b class="nc">&nbsp;        List&lt;Pad&gt; all = padService.getByOrganizationId(organizationId);</b>
+<b class="nc">&nbsp;        all.forEach(each -&gt; result.put(each.getId(), each.getTs()));</b>
+<b class="nc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @RequestMapping(value = &quot;/sync&quot;, method = RequestMethod.POST)
+&nbsp;    public SyncResponse sync(HttpServletRequest request, @RequestBody SyncRequest sync) {
+<b class="nc">&nbsp;        SyncResponse response = new SyncResponse();</b>
+<b class="nc">&nbsp;        if (sync.getRemove() != null &amp;&amp; !sync.getRemove().isEmpty()) {</b>
+<b class="nc">&nbsp;            Set&lt;String&gt; removed = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;            for (String id : sync.getRemove()) {</b>
+<b class="nc">&nbsp;                this.padService.deletePad(id);</b>
+<b class="nc">&nbsp;                removed.add(id);</b>
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            response.setRemoved(removed);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        List&lt;Pad&gt; gets = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="nc">&nbsp;        String organizationId = getOrganizationId(request);</b>
+<b class="nc">&nbsp;        if (sync.getUpdate() != null &amp;&amp; !sync.getUpdate().isEmpty()) {</b>
+<b class="nc">&nbsp;            Map&lt;String, Long&gt; updated = new HashMap&lt;&gt;();</b>
+<b class="nc">&nbsp;            for (Pad pad : sync.getUpdate()) {</b>
+<b class="nc">&nbsp;                if (pad.getOrganizationId() != null) {</b>
+<b class="nc">&nbsp;                    if (!pad.getOrganizationId().equals(organizationId)) {</b>
+<b class="nc">&nbsp;                        continue;</b>
+&nbsp;                    }
+&nbsp;                }
+&nbsp;                else {
+<b class="nc">&nbsp;                    pad.setOrganizationId(organizationId);</b>
+&nbsp;                }
+<b class="nc">&nbsp;                if (pad.getTs() &gt; 0) {</b>
+&nbsp;                    // update
+<b class="nc">&nbsp;                    Pad dbPad = this.padService.getPad(pad.getId()).get();</b>
+<b class="nc">&nbsp;                    if (dbPad.getTs() &gt; pad.getTs()) {</b>
+&nbsp;                        // db object is newer than the version sent from the client
+<b class="nc">&nbsp;                        gets.add(dbPad);</b>
+&nbsp;                    }
+&nbsp;                    else {
+<b class="nc">&nbsp;                        this.padService.updatePad(pad);</b>
+<b class="nc">&nbsp;                        updated.put(pad.getId(), pad.getTs());</b>
+&nbsp;                    }
+<b class="nc">&nbsp;                }</b>
+&nbsp;                else {
+&nbsp;                    // insert
+<b class="nc">&nbsp;                    pad.setTs(System.currentTimeMillis());</b>
+<b class="nc">&nbsp;                    Pad saved = this.padService.savePad(pad);</b>
+<b class="nc">&nbsp;                    updated.put(saved.getId(), saved.getCreated());</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+<b class="nc">&nbsp;            response.setUpdated(updated);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        if (sync.getGet() != null &amp;&amp; !sync.getGet().isEmpty()) {</b>
+<b class="nc">&nbsp;            for (String id : sync.getGet()) {</b>
+<b class="nc">&nbsp;                Optional&lt;Pad&gt; obj = this.padService.getPad(id);</b>
+<b class="nc">&nbsp;                if (obj.isPresent()) {</b>
+<b class="nc">&nbsp;                    gets.add(obj.get());</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="nc">&nbsp;            if (!gets.isEmpty()) {</b>
+<b class="nc">&nbsp;                response.setGet(gets);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return response;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-04-27 10:39</div>
+</div>
+</body>
+</html>

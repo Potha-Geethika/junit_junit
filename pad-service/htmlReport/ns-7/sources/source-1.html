@@ -1,0 +1,149 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > CustomJwtAuthenticationConverter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.carbo.pad.security</a>
+</div>
+
+<h1>Coverage Summary for Class: CustomJwtAuthenticationConverter (com.carbo.pad.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CustomJwtAuthenticationConverter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    11.1%
+  </span>
+  <span class="absValue">
+    (1/9)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.carbo.pad.security;
+&nbsp;
+&nbsp;import com.carbo.pad.services.UserClient;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.core.convert.converter.Converter;
+&nbsp;import org.springframework.security.authentication.AbstractAuthenticationToken;
+&nbsp;import org.springframework.security.core.GrantedAuthority;
+&nbsp;import org.springframework.security.core.authority.SimpleGrantedAuthority;
+&nbsp;import org.springframework.security.oauth2.jwt.Jwt;
+&nbsp;import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+&nbsp;import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;import java.util.Collection;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@Component
+<b class="fc">&nbsp;public class CustomJwtAuthenticationConverter implements Converter&lt;Jwt, AbstractAuthenticationToken&gt; {</b>
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    private UserClient userClient;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    private JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public AbstractAuthenticationToken convert(Jwt jwt) {
+&nbsp;        // Extract roles from the token
+<b class="nc">&nbsp;        Collection&lt;GrantedAuthority&gt; authorities = new HashSet&lt;&gt;(jwtGrantedAuthoritiesConverter.convert(jwt));</b>
+&nbsp;
+<b class="nc">&nbsp;        Map user = userClient.getUserInfo(jwt.getTokenValue());</b>
+<b class="nc">&nbsp;        List&lt;String&gt; listAuthorities = ((List) user.get(&quot;authorities&quot;));</b>
+<b class="nc">&nbsp;        authorities.addAll(listAuthorities.stream().map(role -&gt; new SimpleGrantedAuthority(role)) // Assuming Role has a getName method</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList()));</b>
+&nbsp;
+<b class="nc">&nbsp;        JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(jwt, authorities);</b>
+<b class="nc">&nbsp;        authenticationToken.setDetails(user); // Set custom user details</b>
+&nbsp;
+&nbsp;        // Return a new AuthenticationToken object with the combined authorities
+<b class="nc">&nbsp;        return authenticationToken;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-04-27 10:39</div>
+</div>
+</body>
+</html>

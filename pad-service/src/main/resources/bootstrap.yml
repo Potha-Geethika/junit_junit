@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: padservice
+#  profiles:
+#    active:
+#      default
+  cloud:
+    config:
+      enabled: false

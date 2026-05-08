@@ -1,0 +1,277 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Proppant</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.carbo.pad.model</a>
+</div>
+
+<h1>Coverage Summary for Class: Proppant (com.carbo.pad.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Proppant</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/26)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/43)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.carbo.pad.model;
+&nbsp;
+&nbsp;import org.springframework.data.annotation.Id;
+&nbsp;import org.springframework.data.mongodb.core.index.Indexed;
+&nbsp;import org.springframework.data.mongodb.core.mapping.Document;
+&nbsp;import org.springframework.data.mongodb.core.mapping.Field;
+&nbsp;
+&nbsp;import java.math.BigInteger;
+&nbsp;import java.util.Date;
+&nbsp;
+&nbsp;@Document(collection = &quot;proppants&quot;)
+&nbsp;
+&nbsp;public class Proppant {
+&nbsp;    @Id
+&nbsp;    private String id;
+&nbsp;
+&nbsp;    @Field(&quot;name&quot;)
+&nbsp;    private String name;
+&nbsp;
+&nbsp;    @Field(&quot;volumePerStage&quot;)
+&nbsp;    private Float volumePerStage;
+&nbsp;
+&nbsp;    @Field(&quot;totalCleanVolume&quot;)
+&nbsp;    private Float totalCleanVolume;
+&nbsp;
+&nbsp;    @Field(&quot;totalCleanVolumeRound&quot;)
+&nbsp;    private BigInteger totalCleanVolumeRound;
+&nbsp;
+&nbsp;    @Field(&quot;uom&quot;)
+&nbsp;    private String uom;
+&nbsp;
+&nbsp;    @Field(&quot;description&quot;)
+&nbsp;    private String description;
+&nbsp;
+&nbsp;    @Field(&quot;code&quot;)
+&nbsp;    private String code;
+&nbsp;
+&nbsp;    @Field(&quot;price&quot;)
+&nbsp;    private Float price;
+&nbsp;
+&nbsp;    @Field(&quot;discount&quot;)
+&nbsp;    private Float discount;
+&nbsp;
+&nbsp;    @Field(&quot;maxCapacity&quot;)
+&nbsp;    private Float maxCapacity;
+&nbsp;
+<b class="nc">&nbsp;    @Field(&quot;created&quot;)</b>
+<b class="nc">&nbsp;    private Long created = new Date().getTime();</b>
+&nbsp;
+<b class="nc">&nbsp;    @Field(&quot;modified&quot;)</b>
+<b class="nc">&nbsp;    private Long modified  = new Date().getTime();</b>
+&nbsp;    @Field(&quot;organizationId&quot;)
+&nbsp;    private String organizationId;
+&nbsp;
+&nbsp;    public String getOrganizationId() {
+<b class="nc">&nbsp;        return organizationId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setOrganizationId(String organizationId) {
+<b class="nc">&nbsp;        this.organizationId = organizationId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public String getId() {
+<b class="nc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setId(String id) {
+<b class="nc">&nbsp;        this.id = id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getName() {
+<b class="nc">&nbsp;        return name;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setName(String name) {
+<b class="nc">&nbsp;        this.name = name;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getVolumePerStage() {
+<b class="nc">&nbsp;        return volumePerStage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setVolumePerStage(Float volumePerStage) {
+<b class="nc">&nbsp;        this.volumePerStage = volumePerStage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getMaxCapacity() {
+<b class="nc">&nbsp;        return maxCapacity;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMaxCapacity(Float maxCapacity) {
+<b class="nc">&nbsp;        this.maxCapacity = maxCapacity;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getUom() {
+<b class="nc">&nbsp;        return uom;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setUom(String uom) {
+<b class="nc">&nbsp;        this.uom = uom;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getDescription() {
+<b class="nc">&nbsp;        return description;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setDescription(String description) {
+<b class="nc">&nbsp;        this.description = description;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getCode() {
+<b class="nc">&nbsp;        return code;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setCode(String code) {
+<b class="nc">&nbsp;        this.code = code;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getPrice() {
+<b class="nc">&nbsp;        return price;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setPrice(Float price) {
+<b class="nc">&nbsp;        this.price = price;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getTotalCleanVolume() {
+<b class="nc">&nbsp;        return totalCleanVolume;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTotalCleanVolume(Float totalCleanVolume) {
+<b class="nc">&nbsp;        this.totalCleanVolume = totalCleanVolume;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getDiscount() {
+<b class="nc">&nbsp;        return discount;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setDiscount(Float discount) {
+<b class="nc">&nbsp;        this.discount = discount;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public BigInteger getTotalCleanVolumeRound() {
+<b class="nc">&nbsp;        return totalCleanVolumeRound;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTotalCleanVolumeRound(BigInteger totalCleanVolumeRound) {
+<b class="nc">&nbsp;        this.totalCleanVolumeRound = totalCleanVolumeRound;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+<b class="nc">&nbsp;    public Proppant(Proppant p ) {</b>
+<b class="nc">&nbsp;        this.id = p.id;</b>
+<b class="nc">&nbsp;        this.code = p.code;</b>
+<b class="nc">&nbsp;        this.description = p.description;</b>
+<b class="nc">&nbsp;        this.created = p.created;</b>
+<b class="nc">&nbsp;        this.name = p.name;</b>
+<b class="nc">&nbsp;        this.volumePerStage = p.volumePerStage;</b>
+<b class="nc">&nbsp;        this.totalCleanVolume = p.totalCleanVolume;</b>
+<b class="nc">&nbsp;        this.totalCleanVolumeRound = p.totalCleanVolumeRound;</b>
+<b class="nc">&nbsp;        this.uom = p.uom;</b>
+<b class="nc">&nbsp;        this.description = p.description;</b>
+<b class="nc">&nbsp;        this.price = p.price;</b>
+<b class="nc">&nbsp;        this.discount = p.discount;</b>
+<b class="nc">&nbsp;        this.maxCapacity = p.maxCapacity;</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+<b class="nc">&nbsp;    public Proppant() {</b>
+&nbsp;
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-04-27 10:39</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,138 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > KeyEncryptionUtil</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.carbo.pad.security</a>
+</div>
+
+<h1>Coverage Summary for Class: KeyEncryptionUtil (com.carbo.pad.security)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">KeyEncryptionUtil</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/12)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.carbo.pad.security;
+&nbsp;
+&nbsp;import javax.crypto.Cipher;
+&nbsp;import javax.crypto.KeyGenerator;
+&nbsp;import javax.crypto.SecretKey;
+&nbsp;import java.util.Base64;
+&nbsp;
+<b class="nc">&nbsp;public class KeyEncryptionUtil {</b>
+&nbsp;
+&nbsp;    private static final String ALGORITHM = &quot;AES&quot;;
+&nbsp;
+&nbsp;    // Encrypt data using AES
+&nbsp;    public static String encrypt(String data, SecretKey key) throws Exception {
+<b class="nc">&nbsp;        Cipher cipher = Cipher.getInstance(ALGORITHM);</b>
+<b class="nc">&nbsp;        cipher.init(Cipher.ENCRYPT_MODE, key);</b>
+<b class="nc">&nbsp;        byte[] encryptedBytes = cipher.doFinal(data.getBytes());</b>
+<b class="nc">&nbsp;        return Base64.getEncoder().encodeToString(encryptedBytes);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Decrypt data using AES
+&nbsp;    public static String decrypt(String encryptedData, SecretKey key) throws Exception {
+<b class="nc">&nbsp;        Cipher cipher = Cipher.getInstance(ALGORITHM);</b>
+<b class="nc">&nbsp;        cipher.init(Cipher.DECRYPT_MODE, key);</b>
+<b class="nc">&nbsp;        byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedData));</b>
+<b class="nc">&nbsp;        return new String(decryptedBytes);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Generate a new AES key
+&nbsp;    public static SecretKey generateKey() throws Exception {
+<b class="nc">&nbsp;        KeyGenerator keyGenerator = KeyGenerator.getInstance(ALGORITHM);</b>
+<b class="nc">&nbsp;        keyGenerator.init(256); // 256-bit AES key</b>
+<b class="nc">&nbsp;        return keyGenerator.generateKey();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-04-27 10:39</div>
+</div>
+</body>
+</html>

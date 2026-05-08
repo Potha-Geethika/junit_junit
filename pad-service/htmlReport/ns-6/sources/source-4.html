@@ -1,0 +1,439 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ChemicalDeliveryEntry</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.carbo.pad.model</a>
+</div>
+
+<h1>Coverage Summary for Class: ChemicalDeliveryEntry (com.carbo.pad.model)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ChemicalDeliveryEntry</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/57)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/65)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.carbo.pad.model;
+&nbsp;
+&nbsp;import jakarta.validation.constraints.NotEmpty;
+&nbsp;import org.springframework.data.annotation.Id;
+&nbsp;import org.springframework.data.mongodb.core.index.Indexed;
+&nbsp;import org.springframework.data.mongodb.core.mapping.Document;
+&nbsp;import org.springframework.data.mongodb.core.mapping.Field;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Document(collection = &quot;chemical-delivery-entries&quot;)
+<b class="nc">&nbsp;public class ChemicalDeliveryEntry {</b>
+&nbsp;    @Id
+&nbsp;    private String id;
+&nbsp;
+&nbsp;    @Field(&quot;jobId&quot;)
+&nbsp;    @Indexed(unique = false)
+&nbsp;    private String jobId;
+&nbsp;
+&nbsp;    @Field(&quot;date&quot;)
+&nbsp;    @NotEmpty(message = &quot;date can not be empty&quot;)
+&nbsp;    private Date date;
+&nbsp;
+&nbsp;    @Field(&quot;vendor&quot;)
+&nbsp;    @NotEmpty(message = &quot;vendor can not be empty&quot;)
+&nbsp;    private String vendor;
+&nbsp;
+&nbsp;    @Field(&quot;chemical&quot;)
+&nbsp;    @NotEmpty(message = &quot;chemical can not be empty&quot;)
+&nbsp;    private String chemical;
+&nbsp;
+&nbsp;    @Field(&quot;bol&quot;)
+&nbsp;    @NotEmpty(message = &quot;bol can not be empty&quot;)
+&nbsp;    private String bol;
+&nbsp;
+&nbsp;    @Field(&quot;po&quot;)
+&nbsp;    @NotEmpty(message = &quot;po can not be empty&quot;)
+&nbsp;    private String po;
+&nbsp;
+&nbsp;    @Field(&quot;received&quot;)
+&nbsp;    private Float received;
+&nbsp;
+&nbsp;    @Field(&quot;returned&quot;)
+&nbsp;    private Float returned;
+&nbsp;
+&nbsp;    @Field(&quot;transferredToJobId&quot;)
+&nbsp;    private String transferredToJobId;
+&nbsp;
+&nbsp;    @Field(&quot;transferredFromWell&quot;)
+&nbsp;    private String transferredFromWell;
+&nbsp;
+&nbsp;    @Field(&quot;transferredFromJobId&quot;)
+&nbsp;    private String transferredFromJobId;
+&nbsp;
+&nbsp;    @Field(&quot;transferredToJob&quot;)
+&nbsp;    private Float transferredToJob;
+&nbsp;
+&nbsp;    @Field(&quot;transferredToYard&quot;)
+&nbsp;    private Float transferredToYard;
+&nbsp;
+&nbsp;    @Field(&quot;writeOffBalance&quot;)
+&nbsp;    private Float writeOffBalance;
+&nbsp;
+&nbsp;    @Field(&quot;uom&quot;)
+&nbsp;    private String uom;
+&nbsp;
+&nbsp;    @Field(&quot;bolQuantity&quot;)
+&nbsp;    private Float bolQuantity;
+&nbsp;
+&nbsp;    @Field(&quot;strengthBaume&quot;)
+&nbsp;    private String strengthBaume;
+&nbsp;
+&nbsp;    @Field(&quot;gallons&quot;)
+&nbsp;    private Float gallons;
+&nbsp;
+&nbsp;    @Field(&quot;rawGallons&quot;)
+&nbsp;    private Float rawGallons;
+&nbsp;
+<b class="nc">&nbsp;    @Field(&quot;usedIn&quot;)</b>
+&nbsp;    private List&lt;ChemicalUsed&gt; usedIn = new ArrayList&lt;&gt;();
+&nbsp;
+<b class="nc">&nbsp;    @Field(&quot;inventoryType&quot;)</b>
+&nbsp;    private String inventoryType = &quot;&quot;;
+&nbsp;
+<b class="nc">&nbsp;    @Field(&quot;created&quot;)</b>
+<b class="nc">&nbsp;    private Long created = new Date().getTime();</b>
+&nbsp;
+<b class="nc">&nbsp;    @Field(&quot;modified&quot;)</b>
+<b class="nc">&nbsp;    private Long modified  = new Date().getTime();</b>
+&nbsp;
+&nbsp;    @Field(&quot;organizationId&quot;)
+&nbsp;    @Indexed(unique = false)
+&nbsp;    private String organizationId;
+&nbsp;
+&nbsp;    @Field(&quot;ts&quot;)
+&nbsp;    private Long ts;
+&nbsp;
+<b class="nc">&nbsp;    @Field(&quot;status&quot;)</b>
+&nbsp;    private String status = &quot;&quot;;
+&nbsp;
+&nbsp;    @Field(&quot;lastModifiedBy&quot;)
+&nbsp;    private String lastModifiedBy;
+&nbsp;
+&nbsp;    @Field(&quot;isMigrated&quot;)
+&nbsp;    private Boolean isMigrated;
+&nbsp;
+<b class="nc">&nbsp;    @Field(&quot;standBy&quot;)</b>
+&nbsp;    private boolean standBy = false;
+&nbsp;
+&nbsp;    public String getId() {
+<b class="nc">&nbsp;        return id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setId(String id) {
+<b class="nc">&nbsp;        this.id = id;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Date getDate() {
+<b class="nc">&nbsp;        return date;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setDate(Date date) {
+<b class="nc">&nbsp;        this.date = date;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getChemical() {
+<b class="nc">&nbsp;        return chemical;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setChemical(String chemical) {
+<b class="nc">&nbsp;        this.chemical = chemical;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getBol() {
+<b class="nc">&nbsp;        return bol;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setBol(String bol) {
+<b class="nc">&nbsp;        this.bol = bol;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getReceived() {
+<b class="nc">&nbsp;        return received;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setReceived(Float received) {
+<b class="nc">&nbsp;        this.received = received;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getBolQuantity() {
+<b class="nc">&nbsp;        return bolQuantity;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setBolQuantity(Float bolQuantity) {
+<b class="nc">&nbsp;        this.bolQuantity = bolQuantity;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getStrengthBaume() {
+<b class="nc">&nbsp;        return strengthBaume;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStrengthBaume(String strengthBaume) {
+<b class="nc">&nbsp;        this.strengthBaume = strengthBaume;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getGallons() {
+<b class="nc">&nbsp;        return gallons;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setGallons(Float gallons) {
+<b class="nc">&nbsp;        this.gallons = gallons;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;ChemicalUsed&gt; getUsedIn() {
+<b class="nc">&nbsp;        return usedIn;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setUsedIn(List&lt;ChemicalUsed&gt; usedIn) {
+<b class="nc">&nbsp;        this.usedIn = usedIn;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getUom() {
+<b class="nc">&nbsp;        return uom;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setUom(String uom) {
+<b class="nc">&nbsp;        this.uom = uom;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getVendor() {
+<b class="nc">&nbsp;        return vendor;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setVendor(String vendor) {
+<b class="nc">&nbsp;        this.vendor = vendor;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getPo() {
+<b class="nc">&nbsp;        return po;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setPo(String po) {
+<b class="nc">&nbsp;        this.po = po;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getReturned() {
+<b class="nc">&nbsp;        return returned;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setReturned(Float returned) {
+<b class="nc">&nbsp;        this.returned = returned;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getTransferredToJobId() {
+<b class="nc">&nbsp;        return transferredToJobId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTransferredToJobId(String transferredToJobId) {
+<b class="nc">&nbsp;        this.transferredToJobId = transferredToJobId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public String getTransferredFromJobId() {
+<b class="nc">&nbsp;        return transferredFromJobId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTransferredFromJobId(String transferredFromJobId) {
+<b class="nc">&nbsp;        this.transferredFromJobId = transferredFromJobId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public Float getTransferredToJob() {
+<b class="nc">&nbsp;        return transferredToJob;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTransferredToJob(Float transferredToJob) {
+<b class="nc">&nbsp;        this.transferredToJob = transferredToJob;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public Float getTransferredToYard() {
+<b class="nc">&nbsp;        return transferredToYard;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTransferredToYard(Float transferredToYard) {
+<b class="nc">&nbsp;        this.transferredToYard = transferredToYard;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public Float getWriteOffBalance() {
+<b class="nc">&nbsp;        return writeOffBalance;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setWriteOffBalance(Float writeOffBalance) {
+<b class="nc">&nbsp;        this.writeOffBalance = writeOffBalance;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Float getRawGallons() {
+<b class="nc">&nbsp;        return rawGallons;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setRawGallons(Float rawGallons) {
+<b class="nc">&nbsp;        this.rawGallons = rawGallons;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getInventoryType() {
+<b class="nc">&nbsp;        return inventoryType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setInventoryType(String inventoryType) {
+<b class="nc">&nbsp;        this.inventoryType = inventoryType;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getJobId() {
+<b class="nc">&nbsp;        return jobId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setJobId(String jobId) {
+<b class="nc">&nbsp;        this.jobId = jobId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getOrganizationId() {
+<b class="nc">&nbsp;        return organizationId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setOrganizationId(String organizationId) {
+<b class="nc">&nbsp;        this.organizationId = organizationId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Long getTs() {
+<b class="nc">&nbsp;        return ts;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setTs(Long ts) {
+<b class="nc">&nbsp;        this.ts = ts;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setLastModifiedBy(String lastModifiedBy) {
+<b class="nc">&nbsp;        this.lastModifiedBy = lastModifiedBy;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void updateModified() {
+<b class="nc">&nbsp;        this.modified = new Date().getTime();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Long getCreated() {
+<b class="nc">&nbsp;        return created;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setMigrated(Boolean migrated) {
+<b class="nc">&nbsp;        isMigrated = migrated;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String getStatus() {
+<b class="nc">&nbsp;        return status;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStatus(String status) {
+<b class="nc">&nbsp;        this.status = status;</b>
+&nbsp;    }
+&nbsp;
+<b class="nc">&nbsp;    public String getTransferredFromWell() {return transferredFromWell;}</b>
+&nbsp;
+<b class="nc">&nbsp;    public void setTransferredFromWell(String transferredFromWell) {this.transferredFromWell = transferredFromWell;}</b>
+&nbsp;
+&nbsp;    public boolean isStandBy() {
+<b class="nc">&nbsp;        return standBy;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void setStandBy(boolean standBy) {
+<b class="nc">&nbsp;        this.standBy = standBy;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-04-27 10:39</div>
+</div>
+</body>
+</html>
