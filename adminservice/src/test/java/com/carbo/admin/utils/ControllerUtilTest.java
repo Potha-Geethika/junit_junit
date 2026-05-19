@@ -48,12 +48,12 @@ public class ControllerUtilTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         JwtAuthenticationToken token = Mockito.mock(JwtAuthenticationToken.class);
         Map<String, Object> details = new HashMap<>();
-        details.put("organizationId", "orgId123");
+        details.put("organizationId", "org123");
         Mockito.doReturn(details).when(token).getDetails();
         request.setUserPrincipal(token);
         
         String organizationId = ControllerUtil.getOrganizationId(request);
-        Assertions.assertEquals("orgId123", organizationId);
+        Assertions.assertEquals("org123", organizationId);
     }
 
     @Test
@@ -61,13 +61,13 @@ public class ControllerUtilTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         JwtAuthenticationToken token = Mockito.mock(JwtAuthenticationToken.class);
         Map<String, Object> details = new HashMap<>();
-        details.put("districtId", "districtId456");
+        details.put("districtId", "dist456");
         Mockito.doReturn(details).when(token).getDetails();
         request.setUserPrincipal(token);
         
         Optional<String> districtId = ControllerUtil.getDistrictId(request);
         Assertions.assertTrue(districtId.isPresent());
-        Assertions.assertEquals("districtId456", districtId.get());
+        Assertions.assertEquals("dist456", districtId.get());
     }
 
     @Test

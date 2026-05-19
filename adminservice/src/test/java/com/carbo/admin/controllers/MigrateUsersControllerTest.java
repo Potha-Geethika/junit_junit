@@ -51,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(MigrateUsersController.class)
-class MigrateUsersControllerTest {
+public class MigrateUsersControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -59,75 +59,79 @@ class MigrateUsersControllerTest {
     @MockBean
     private MigrateUsersService migrateusersService;
 
-    private List<AiUser> aiUserList;
-    private List<UserResponseDTO> userResponseDTOList;
-    private List<User> userList;
+    private AiUser aiUser;
+    private UserResponseDTO userResponseDTO;
 
     @BeforeEach
     void setUp() {
-        aiUserList = new ArrayList<>();
-        userResponseDTOList = new ArrayList<>();
-        userList = new ArrayList<>();
+        aiUser = new AiUser();
+        aiUser.setEmailAddress("test@example.com");
+
+        userResponseDTO = new UserResponseDTO();
+        userResponseDTO.setUserName("testUser");
+        userResponseDTO.setFirstName("Test");
+        userResponseDTO.setLastName("User");
     }
 
     @Test
     void saveAiUsersAndCollectUnsaved_HappyPath() throws Exception {
-        when(migrateusersService.saveAiUsersAndCollectUnsaved(anyList())).thenReturn(aiUserList);
+        when(migrateusersService.saveAiUsersAndCollectUnsaved(anyList())).thenReturn(Collections.singletonList(aiUser));
 
         mockMvc.perform(post("/v1/user/migrate/saveAiUsers")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("[{\"emailAddress\":\"test@example.com\",\"tenantName\":\"TestTenant\"}]"))
+                .content("[{\"emailAddress\":\"test@example.com\"}]"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$[0].emailAddress").value("test@example.com"));
 
-        verify(migrateusersService, times(1)).saveAiUsersAndCollectUnsaved(anyList());
+        Mockito.verify(migrateusersService).saveAiUsersAndCollectUnsaved(anyList());
     }
 
     @Test
     void saveAiUsersAndCollectUnsaved_InternalServerError() throws Exception {
-        when(migrateusersService.saveAiUsersAndCollectUnsaved(anyList())).thenThrow(new RuntimeException("Internal Server Error"));
+        doThrow(new RuntimeException("Internal Server Error")).when(migrateusersService).saveAiUsersAndCollectUnsaved(anyList());
 
         mockMvc.perform(post("/v1/user/migrate/saveAiUsers")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("[{\"emailAddress\":\"test@example.com\",\"tenantName\":\"TestTenant\"}]"))
+                .content("[{\"emailAddress\":\"test@example.com\"}]"))
                 .andExpect(status().isInternalServerError());
 
-        verify(migrateusersService, times(1)).saveAiUsersAndCollectUnsaved(anyList());
+        Mockito.verify(migrateusersService).saveAiUsersAndCollectUnsaved(anyList());
     }
 
     @Test
     void getAllUsersForAi_HappyPath() throws Exception {
-        when(migrateusersService.getAllUsersForAi()).thenReturn(userResponseDTOList);
+        when(migrateusersService.getAllUsersForAi()).thenReturn(Collections.singletonList(userResponseDTO));
 
         mockMvc.perform(get("/v1/user/migrate/getAllUsersForAi"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$[0].userName").value("testUser"))
+                .andExpect(jsonPath("$[0].firstName").value("Test"))
+                .andExpect(jsonPath("$[0].lastName").value("User"));
 
-        verify(migrateusersService, times(1)).getAllUsersForAi();
+        Mockito.verify(migrateusersService).getAllUsersForAi();
     }
 
     @Test
     void setUserAzureId_HappyPath() throws Exception {
-        when(migrateusersService.setUserAzureId(anyList())).thenReturn(userList);
+        when(migrateusersService.setUserAzureId(anyList())).thenReturn(Collections.emptyList());
 
         mockMvc.perform(put("/v1/user/migrate/setUserAzureId")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("[{\"emailAddress\":\"test@example.com\",\"azureUserId\":\"12345\"}]"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .content("[{\"azureUserId\":\"someId\",\"emailAddress\":\"test@example.com\"}]"))
+                .andExpect(status().isOk());
 
-        verify(migrateusersService, times(1)).setUserAzureId(anyList());
+        Mockito.verify(migrateusersService).setUserAzureId(anyList());
     }
 
     @Test
     void setUserAzureId_InternalServerError() throws Exception {
-        when(migrateusersService.setUserAzureId(anyList())).thenThrow(new RuntimeException("Internal Server Error"));
+        doThrow(new RuntimeException("Internal Server Error")).when(migrateusersService).setUserAzureId(anyList());
 
         mockMvc.perform(put("/v1/user/migrate/setUserAzureId")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("[{\"emailAddress\":\"test@example.com\",\"azureUserId\":\"12345\"}]"))
+                .content("[{\"azureUserId\":\"someId\",\"emailAddress\":\"test@example.com\"}]"))
                 .andExpect(status().isInternalServerError());
 
-        verify(migrateusersService, times(1)).setUserAzureId(anyList());
+        Mockito.verify(migrateusersService).setUserAzureId(anyList());
     }
 }

@@ -47,10 +47,12 @@ public class HelloControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void index_HappyPath_Returns200AndGreeting() throws Exception {
+    public void testIndex_HappyPath() throws Exception {
         mockMvc.perform(get("/")
-                .accept(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Greetings from Spring Boot!"));
     }
+
+    // No error path tests are generated since no error handling or validation is defined
 }

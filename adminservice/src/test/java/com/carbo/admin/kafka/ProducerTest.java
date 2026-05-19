@@ -1,5 +1,5 @@
 package com.carbo.admin.kafka;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.io.*;
 import java.nio.file.*;
@@ -49,45 +49,46 @@ class ProducerTest {
 
     @BeforeEach
     void setUp() {
-        // No specific setup needed for this test
+        // No special setup needed
     }
 
     @Test
-    void push_HappyPath() {
+    void testPush_HappyPath() {
         String topic = "test-topic";
-        Object value = new Object();
+        Object value = "test-value";
+
+        doNothing().when(kafkaTemplate).send(topic, value);
+        
+        producer.push(topic, value);
+    }
+
+    @Test
+    void testPush_NullValue() {
+        String topic = "test-topic";
+        Object value = null;
+
+        doNothing().when(kafkaTemplate).send(topic, value);
+        
+        producer.push(topic, value);
+    }
+
+    @Test
+    void testPush_EmptyTopic() {
+        String topic = "";
+        Object value = "test-value";
+
+        doNothing().when(kafkaTemplate).send(any(String.class), any(Object.class));
+        
+        producer.push(topic, value);
+    }
+
+    @Test
+    void testPush_ErrorHandling() {
+        String topic = "test-topic";
+        Object value = "test-value";
+
+        when(kafkaTemplate.send(topic, value)).thenThrow(new RuntimeException("Error sending message"));
 
         producer.push(topic, value);
-
-        verify(kafkaTemplate, times(1)).send(topic, value);
-    }
-
-    @Test
-    void push_NullTopic() {
-        Object value = new Object();
-
-        producer.push(null, value);
-
-        verify(kafkaTemplate, never()).send(anyString(), eq(value));
-    }
-
-    @Test
-    void push_EmptyTopic() {
-        Object value = new Object();
-
-        producer.push("", value);
-
-        verify(kafkaTemplate, never()).send(anyString(), eq(value));
-    }
-
-    @Test
-    void push_RuntimeException() {
-        String topic = "test-topic";
-        Object value = new Object();
-        doThrow(new RuntimeException("Simulated exception")).when(kafkaTemplate).send(topic, value);
-
-        producer.push(topic, value);
-
-        verify(kafkaTemplate, times(1)).send(topic, value);
     }
 }

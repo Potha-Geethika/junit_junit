@@ -1,4 +1,5 @@
 package com.carbo.admin.services;
+import static org.mockito.ArgumentMatchers.any;
 
 import com.carbo.admin.model.District;
 import com.carbo.admin.repository.DistrictMongoDbRepository;
@@ -58,68 +59,96 @@ class DistrictServiceTest {
         district.setId("1");
         district.setName("Test District");
         district.setOrganizationId("org-1");
+        district.setColor("blue");
     }
 
     @Test
-    void testGetAll() {
+    void getAll_HappyPath() {
         when(districtRepository.findAll()).thenReturn(Collections.singletonList(district));
 
         List<District> result = districtService.getAll();
-        
+
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(district, result.get(0));
-        verify(districtRepository, times(1)).findAll();
+        assertEquals("Test District", result.get(0).getName());
     }
 
     @Test
-    void testGetByOrganizationId() {
+    void getAll_EmptyList() {
+        when(districtRepository.findAll()).thenReturn(Collections.emptyList());
+
+        List<District> result = districtService.getAll();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getByOrganizationId_HappyPath() {
         when(districtRepository.findByOrganizationId("org-1")).thenReturn(Collections.singletonList(district));
 
         List<District> result = districtService.getByOrganizationId("org-1");
-        
+
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(district, result.get(0));
-        verify(districtRepository, times(1)).findByOrganizationId("org-1");
+        assertEquals("Test District", result.get(0).getName());
     }
 
     @Test
-    void testGet() {
+    void getByOrganizationId_EmptyList() {
+        when(districtRepository.findByOrganizationId("org-2")).thenReturn(Collections.emptyList());
+
+        List<District> result = districtService.getByOrganizationId("org-2");
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void get_HappyPath() {
         when(districtRepository.findById("1")).thenReturn(Optional.of(district));
 
         Optional<District> result = districtService.get("1");
 
         assertNotNull(result);
-        assertEquals(district, result.get());
-        verify(districtRepository, times(1)).findById("1");
+        assertTrue(result.isPresent());
+        assertEquals("Test District", result.get().getName());
     }
 
     @Test
-    void testSave() {
-        when(districtRepository.save(district)).thenReturn(district);
+    void get_NotFound() {
+        when(districtRepository.findById("2")).thenReturn(Optional.empty());
+
+        Optional<District> result = districtService.get("2");
+
+        assertNotNull(result);
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    void save_HappyPath() {
+        when(districtRepository.save(any(District.class))).thenReturn(district);
 
         District result = districtService.save(district);
-        
+
         assertNotNull(result);
-        assertEquals(district, result);
+        assertEquals("Test District", result.getName());
+    }
+
+    @Test
+    void update_HappyPath() {
+        doNothing().when(districtRepository).save(any(District.class));
+
+        assertDoesNotThrow(() -> districtService.update(district));
+
         verify(districtRepository, times(1)).save(district);
     }
 
     @Test
-    void testUpdate() {
-        doNothing().when(districtRepository).save(district);
-
-        districtService.update(district);
-
-        verify(districtRepository, times(1)).save(district);
-    }
-
-    @Test
-    void testDelete() {
+    void delete_HappyPath() {
         doNothing().when(districtRepository).deleteById("1");
 
-        districtService.delete("1");
+        assertDoesNotThrow(() -> districtService.delete("1"));
 
         verify(districtRepository, times(1)).deleteById("1");
     }

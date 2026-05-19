@@ -57,6 +57,7 @@ import static org.mockito.MockitoAnnotations.openMocks;
 
 
 
+@ExtendWith(MockitoExtension.class)
 class MigrateUsersServiceTest {
 
     @Mock
@@ -70,117 +71,99 @@ class MigrateUsersServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        migrateUsersService = new MigrateUsersService(userRepository, mongoTemplate);
     }
 
     @Test
-    void saveAiUsersAndCollectUnsaved_HappyPath() {
-        List<AiUser> aiUsers = createAiUsers();
-        List<User> existingUsers = new ArrayList<>();
-        when(userRepository.findAll()).thenReturn(existingUsers);
-        
-        Organization organization = new Organization();
-        organization.setId("org-1");
-        organization.setName("Tenant1");
-        when(mongoTemplate.find(any(), eq(Organization.class))).thenReturn(List.of(organization));
+    void testSaveAiUsersAndCollectUnsaved_HappyPath() {
+        List<AiUser> aiUsers = List.of(new AiUser("1", 1, "tenant1", 1, "username1", "name1", "surname1", "email@example.com", "1234567890", "role", "notificationType", "active"));
+        List<User> allUsers = Collections.emptyList();
+        when(userRepository.findAll()).thenReturn(allUsers);
 
-        List<User> savedUsers = new ArrayList<>();
-        when(userRepository.saveAll(any())).thenAnswer(invocation -> {
-            savedUsers.addAll(invocation.getArgument(0));
-            return savedUsers;
-        });
+        Set<Organization> organizations = Set.of(new Organization());
+        when(mongoTemplate.find(any(Query.class), any())).thenReturn(new ArrayList<>(organizations));
 
         List<AiUser> result = migrateUsersService.saveAiUsersAndCollectUnsaved(aiUsers);
-
         assertNotNull(result);
         assertEquals(0, result.size());
-        assertEquals(1, savedUsers.size());
     }
 
     @Test
-    void saveAiUsersAndCollectUnsaved_UsernameAlreadyExists() {
-        List<AiUser> aiUsers = createAiUsers();
-        User existingUser = new User();
-        existingUser.setUserName("existing@example.com");
-        when(userRepository.findAll()).thenReturn(List.of(existingUser));
+    void testSaveAiUsersAndCollectUnsaved_OrganizationNotFound() {
+        List<AiUser> aiUsers = List.of(new AiUser("1", 1, "tenant1", 1, "username1", "name1", "surname1", "email@example.com", "1234567890", "role", "notificationType", "active"));
+        List<User> allUsers = Collections.emptyList();
+        when(userRepository.findAll()).thenReturn(allUsers);
+        when(mongoTemplate.find(any(Query.class), any())).thenReturn(Collections.emptyList());
 
         List<AiUser> result = migrateUsersService.saveAiUsersAndCollectUnsaved(aiUsers);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("User not created : Username already exists in db", result.get(0).getStatus());
-    }
-
-    @Test
-    void saveAiUsersAndCollectUnsaved_OrganizationNotFound() {
-        List<AiUser> aiUsers = createAiUsers();
-        when(userRepository.findAll()).thenReturn(Collections.emptyList());
-        when(mongoTemplate.find(any(), eq(Organization.class))).thenReturn(Collections.emptyList());
-
-        List<AiUser> result = migrateUsersService.saveAiUsersAndCollectUnsaved(aiUsers);
-
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("User not created : Organization is not found with the tenant name", result.get(0).getStatus());
     }
 
     @Test
-    void saveAiUsersAndCollectUnsaved_ErrorHandling() {
-        List<AiUser> aiUsers = createAiUsers();
-        when(userRepository.findAll()).thenThrow(new RuntimeException("DB error"));
+    void testSaveAiUsersAndCollectUnsaved_UsernameAlreadyExists() {
+        List<AiUser> aiUsers = List.of(new AiUser("1", 1, "tenant1", 1, "username1", "name1", "surname1", "email@example.com", "1234567890", "role", "notificationType", "active"));
+        User existingUser = new User();
+        existingUser.setUserName("username1");
+        when(userRepository.findAll()).thenReturn(List.of(existingUser));
 
-        try {
-            migrateUsersService.saveAiUsersAndCollectUnsaved(aiUsers);
-        } catch (ErrorException e) {
-            assertEquals("Some Error occurred : DB error", e.getError().getErrorMessage());
-        }
+        List<AiUser> result = migrateUsersService.saveAiUsersAndCollectUnsaved(aiUsers);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("User not created : Username already exists in db", result.get(0).getStatus());
     }
 
     @Test
-    void getAllUsersForAi_HappyPath() {
-        when(userRepository.findAllUsersWithSelectedFields()).thenReturn(Collections.emptyList());
+    void testSaveAiUsersAndCollectUnsaved_ExceptionHandling() {
+        List<AiUser> aiUsers = List.of(new AiUser("1", 1, "tenant1", 1, "username1", "name1", "surname1", "email@example.com", "1234567890", "role", "notificationType", "active"));
+        when(userRepository.findAll()).thenThrow(new RuntimeException("Database Error"));
+
+        ErrorException exception = org.junit.jupiter.api.Assertions.assertThrows(ErrorException.class, () -> {
+            migrateUsersService.saveAiUsersAndCollectUnsaved(aiUsers);
+        });
+
+        assertNotNull(exception);
+        assertEquals(HttpStatus.BAD_REQUEST.toString(), exception.getError().getErrorCode());
+        assertEquals("Some Error occurred : Database Error", exception.getError().getErrorMessage());
+    }
+
+    @Test
+    void testGetAllUsersForAi() {
+        List<UserResponseDTO> users = List.of(new UserResponseDTO());
+        when(userRepository.findAllUsersWithSelectedFields()).thenReturn(users);
         when(mongoTemplate.findAll(Organization.class)).thenReturn(Collections.emptyList());
 
         List<UserResponseDTO> result = migrateUsersService.getAllUsersForAi();
-
         assertNotNull(result);
-        assertEquals(0, result.size());
+        assertEquals(users.size(), result.size());
     }
 
     @Test
-    void setUserAzureId_HappyPath() {
-        List<AiUser> aiUsers = createAiUsers();
+    void testSetUserAzureId_HappyPath() {
+        List<AiUser> aiUsers = List.of(new AiUser("1", 1, "tenant1", 1, "username1", "name1", "surname1", "email@example.com", "1234567890", "role", "notificationType", "active"));
         User existingUser = new User();
-        existingUser.setUserName("user@example.com");
-        existingUser.setAzureId(null);
-        
+        existingUser.setUserName("username1");
+        existingUser.setAzureId("oldAzureId");
         when(userRepository.findAll()).thenReturn(List.of(existingUser));
-        when(userRepository.save(any(User.class))).thenReturn(existingUser);
 
         List<User> result = migrateUsersService.setUserAzureId(aiUsers);
-
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("azure-id", result.get(0).getAzureId());
+        assertEquals("1", result.get(0).getAzureId());
     }
 
     @Test
-    void setUserAzureId_ErrorHandling() {
-        List<AiUser> aiUsers = createAiUsers();
-        when(userRepository.findAll()).thenThrow(new RuntimeException("DB error"));
+    void testSetUserAzureId_ExceptionHandling() {
+        List<AiUser> aiUsers = List.of(new AiUser("1", 1, "tenant1", 1, "username1", "name1", "surname1", "email@example.com", "1234567890", "role", "notificationType", "active"));
+        when(userRepository.findAll()).thenThrow(new RuntimeException("Database Error"));
 
-        try {
+        ErrorException exception = org.junit.jupiter.api.Assertions.assertThrows(ErrorException.class, () -> {
             migrateUsersService.setUserAzureId(aiUsers);
-        } catch (ErrorException e) {
-            assertEquals("Some Error occurred : DB error", e.getError().getErrorMessage());
-        }
-    }
+        });
 
-    private List<AiUser> createAiUsers() {
-        AiUser aiUser = new AiUser();
-        aiUser.setEmailAddress("user@example.com");
-        aiUser.setTenantName("Tenant1");
-        aiUser.setAzureUserId("azure-id");
-        return List.of(aiUser);
+        assertNotNull(exception);
+        assertEquals(HttpStatus.BAD_REQUEST.toString(), exception.getError().getErrorCode());
+        assertEquals("Some Error occurred : Database Error", exception.getError().getErrorMessage());
     }
 }

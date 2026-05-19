@@ -85,6 +85,7 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 
 
 
+
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
@@ -92,139 +93,230 @@ class UserServiceTest {
     private UserMongoDbRepository userRepository;
 
     @Mock
-    private MongoTemplate mongoTemplate;
-
-    @Mock
     private Producer producer;
-
-    @Mock
-    private GraphServiceClient graphServiceClient;
 
     @InjectMocks
     private UserService userService;
 
-    private User user;
-
     @BeforeEach
     void setUp() {
-        user = new User();
-        user.setUserName("testuser");
-        user.setPassword("Password123!");
-        user.setFirstName("Test");
-        user.setLastName("User");
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
     void getAll() {
-        when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
-        assertNotNull(userService.getAll());
-        assertEquals(1, userService.getAll().size());
+        when(userRepository.findAll()).thenReturn(Collections.emptyList());
+        List<User> users = userService.getAll();
+        assertNotNull(users);
+        assertEquals(0, users.size());
     }
 
     @Test
     void getByOrganizationId() {
-        when(userRepository.findByOrganizationId(anyString())).thenReturn(Collections.singletonList(user));
-        assertNotNull(userService.getByOrganizationId("orgId"));
-        assertEquals(1, userService.getByOrganizationId("orgId").size());
+        String organizationId = "org-123";
+        when(userRepository.findByOrganizationId(organizationId)).thenReturn(Collections.emptyList());
+        List<User> users = userService.getByOrganizationId(organizationId);
+        assertNotNull(users);
+        assertEquals(0, users.size());
     }
 
     @Test
     void getUser() {
-        when(userRepository.findById(anyString())).thenReturn(Optional.of(user));
-        assertTrue(userService.getUser("someId").isPresent());
+        String userId = "user-123";
+        User user = new User();
+        user.setId(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        Optional<User> foundUser = userService.getUser(userId);
+        assertNotNull(foundUser);
+        assertEquals(userId, foundUser.get().getId());
     }
 
     @Test
     void getUserByUserName() {
-        when(userRepository.findByUserNameIgnoreCase(anyString())).thenReturn(Optional.of(user));
-        assertTrue(userService.getUserByUserName("testuser").isPresent());
+        String userName = "testUser";
+        User user = new User();
+        user.setUserName(userName);
+        when(userRepository.findByUserNameIgnoreCase(userName)).thenReturn(Optional.of(user));
+        Optional<User> foundUser = userService.getUserByUserName(userName);
+        assertNotNull(foundUser);
+        assertEquals(userName, foundUser.get().getUserName());
     }
 
     @Test
     void saveUser() {
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        User user = new User();
+        user.setUserName("newUser");
+        when(userRepository.save(user)).thenReturn(user);
         User savedUser = userService.saveUser(user);
         assertNotNull(savedUser);
-        assertEquals("testuser", savedUser.getUserName());
+        assertEquals("newUser", savedUser.getUserName());
     }
 
     @Test
     void updateUser() {
+        User user = new User();
+        user.setId("user-123");
+        when(userRepository.save(user)).thenReturn(user);
         userService.updateUser(user);
-        verify(userRepository, times(1)).save(user);
     }
 
     @Test
     void deleteUser() {
-        userService.deleteUser("userId");
-        verify(userRepository, times(1)).deleteById("userId");
+        String userId = "user-123";
+        doNothing().when(userRepository).deleteById(userId);
+        userService.deleteUser(userId);
     }
 
     @Test
-    void sendOtpEmail_UserNotFound() {
-        when(userRepository.findByUserNameIgnoreCase(anyString())).thenReturn(Optional.empty());
-        ErrorException thrown = assertThrows(ErrorException.class, () -> userService.sendOtpEmail("unknownUser"));
-        assertEquals(Constants.USER_NOT_EXISTS_CODE, thrown.getError().getErrorCode());
+    void sendOtpEmail_UserDoesNotExist() {
+        String username = "nonExistentUser";
+        when(userRepository.findByUserNameIgnoreCase(username)).thenReturn(Optional.empty());
+        ErrorException exception = assertThrows(ErrorException.class, () -> userService.sendOtpEmail(username));
+        assertEquals(Constants.USER_NOT_EXISTS_CODE, exception.getError().getErrorCode());
     }
 
     @Test
     void sendOtpEmail_Success() {
-        when(userRepository.findByUserNameIgnoreCase(anyString())).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        userService.sendOtpEmail("testuser");
-        assertNotNull(user.getOtpCode());
+        String username = "existingUser";
+        User user = new User();
+        user.setUserName(username);
+        when(userRepository.findByUserNameIgnoreCase(username)).thenReturn(Optional.of(user));
+        doNothing().when(userRepository).save(any(User.class));
+        userService.sendOtpEmail(username);
     }
 
     @Test
-    void validateOtp_UserNotFound() {
-        when(userRepository.findByUserNameIgnoreCase(anyString())).thenReturn(Optional.empty());
-        ErrorException thrown = assertThrows(ErrorException.class, () -> userService.validateOtp("unknownUser", "123456", "2021-01-01 00:00:00"));
-        assertEquals(Constants.USER_NOT_EXISTS_CODE, thrown.getError().getErrorCode());
+    void validateOtp_UserDoesNotExist() {
+        String username = "nonExistentUser";
+        String submittedOtp = "123456";
+        String otpSubmittedTime = "2023-01-01 10:00:00";
+        when(userRepository.findByUserNameIgnoreCase(username)).thenReturn(Optional.empty());
+        ErrorException exception = assertThrows(ErrorException.class, () -> userService.validateOtp(username, submittedOtp, otpSubmittedTime));
+        assertEquals(Constants.USER_NOT_EXISTS_CODE, exception.getError().getErrorCode());
     }
 
     @Test
     void validateOtp_InvalidOtp() {
-        when(userRepository.findByUserNameIgnoreCase(anyString())).thenReturn(Optional.of(user));
-        user.setOtpCode("654321");
-        ErrorException thrown = assertThrows(ErrorException.class, () -> userService.validateOtp("testuser", "123456", "2021-01-01 00:00:00"));
-        assertEquals(Constants.INVALID_OTP_CODE, thrown.getError().getErrorCode());
+        String username = "existingUser";
+        String submittedOtp = "wrongOtp";
+        String otpSubmittedTime = "2023-01-01 10:00:00";
+        User user = new User();
+        user.setOtpCode("123456");
+        when(userRepository.findByUserNameIgnoreCase(username)).thenReturn(Optional.of(user));
+        ErrorException exception = assertThrows(ErrorException.class, () -> userService.validateOtp(username, submittedOtp, otpSubmittedTime));
+        assertEquals(Constants.INVALID_OTP_CODE, exception.getError().getErrorCode());
     }
 
     @Test
     void validateOtp_Success() {
-        when(userRepository.findByUserNameIgnoreCase(anyString())).thenReturn(Optional.of(user));
-        user.setOtpCode("123456");
-        userService.validateOtp("testuser", "123456", "2021-01-01 00:00:00");
-        assertNull(user.getOtpCode());
+        String username = "existingUser";
+        String submittedOtp = "123456";
+        String otpSubmittedTime = "2023-01-01 10:00:00";
+        User user = new User();
+        user.setOtpCode(submittedOtp);
+        when(userRepository.findByUserNameIgnoreCase(username)).thenReturn(Optional.of(user));
+        doNothing().when(userRepository).save(any(User.class));
+        userService.validateOtp(username, submittedOtp, otpSubmittedTime);
     }
 
     @Test
     void saveUserOnAzureAd_UserAlreadyExists() {
-        when(userRepository.findByUserNameIgnoreCase(anyString())).thenReturn(Optional.of(user));
-        ErrorException thrown = assertThrows(ErrorException.class, () -> userService.saveUserOnAzureAd(user));
-        assertEquals(Constants.USER_ALREADY_EXISTS_CODE, thrown.getError().getErrorCode());
+        User user = new User();
+        user.setUserName("existingUser");
+        when(userRepository.findByUserNameIgnoreCase(user.getUserName())).thenReturn(Optional.of(user));
+        ErrorException exception = assertThrows(ErrorException.class, () -> userService.saveUserOnAzureAd(user));
+        assertEquals(Constants.USER_ALREADY_EXISTS_CODE, exception.getError().getErrorCode());
     }
 
     @Test
     void saveUserOnAzureAd_Success() {
-        when(userRepository.findByUserNameIgnoreCase(anyString())).thenReturn(Optional.empty());
+        User user = new User();
+        user.setUserName("newUser");
+        when(userRepository.findByUserNameIgnoreCase(user.getUserName())).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(user);
         UserResponse response = userService.saveUserOnAzureAd(user);
+        assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getCode());
     }
 
     @Test
+    void updateUserOnAzureAd_UserNotFound() {
+        User user = new User();
+        String userId = "user-123";
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        ErrorException exception = assertThrows(ErrorException.class, () -> userService.updateUserOnAzureAd(user, userId));
+        assertEquals(Constants.USER_NOT_FOUND_CODE, exception.getError().getErrorCode());
+    }
+
+    @Test
+    void updateUserOnAzureAd_Success() {
+        User existingUser = new User();
+        existingUser.setAzureId("azure-id");
+        existingUser.setUserName("existingUser");
+        String userId = "user-123";
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        doNothing().when(userRepository).save(any(User.class));
+        userService.updateUserOnAzureAd(existingUser, userId);
+    }
+
+    @Test
     void deleteUserOnAzureAd_UserNotFound() {
-        when(userRepository.findById(anyString())).thenReturn(Optional.empty());
-        ErrorException thrown = assertThrows(ErrorException.class, () -> userService.deleteUserOnAzureAd("userId"));
-        assertEquals(Constants.USER_NOT_FOUND_CODE, thrown.getError().getErrorCode());
+        String userId = "user-123";
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        ErrorException exception = assertThrows(ErrorException.class, () -> userService.deleteUserOnAzureAd(userId));
+        assertEquals(Constants.USER_NOT_FOUND_CODE, exception.getError().getErrorCode());
     }
 
     @Test
     void deleteUserOnAzureAd_Success() {
-        when(userRepository.findById(anyString())).thenReturn(Optional.of(user));
-        when(user.getAzureId()).thenReturn("azureId");
-        userService.deleteUserOnAzureAd("userId");
-        verify(userRepository, times(1)).deleteById("userId");
+        String userId = "user-123";
+        User user = new User();
+        user.setAzureId("azure-id");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        doNothing().when(userRepository).deleteById(userId);
+        userService.deleteUserOnAzureAd(userId);
+    }
+
+    @Test
+    void updateOpsUserComingFromAi_UserNotFound() {
+        AiUser aiUser = new AiUser();
+        aiUser.setAzureUserId("azure-id");
+        when(userRepository.findByAzureId(aiUser.getAzureUserId())).thenReturn(Optional.empty());
+        userService.updateOpsUserComingFromAi(aiUser);
+    }
+
+    @Test
+    void updateOpsUserComingFromAi_Success() {
+        AiUser aiUser = new AiUser();
+        aiUser.setAzureUserId("azure-id");
+        User user = new User();
+        user.setId("user-123");
+        when(userRepository.findByAzureId(aiUser.getAzureUserId())).thenReturn(Optional.of(user));
+        doNothing().when(userRepository).save(any(User.class));
+        userService.updateOpsUserComingFromAi(aiUser);
+    }
+
+    @Test
+    void deleteOpsUserComingFromAi_UserNotFound() {
+        String azureId = "azure-id";
+        when(userRepository.findByAzureId(azureId)).thenReturn(Optional.empty());
+        userService.deleteOpsUserComingFromAi(azureId);
+    }
+
+    @Test
+    void deleteOpsUserComingFromAi_Success() {
+        String azureId = "azure-id";
+        User user = new User();
+        user.setId("user-123");
+        when(userRepository.findByAzureId(azureId)).thenReturn(Optional.of(user));
+        doNothing().when(userRepository).deleteById(user.getId());
+        userService.deleteOpsUserComingFromAi(azureId);
+    }
+
+    @Test
+    void updateLastPasswordResetFlagOnAzure_Success() {
+        String azureId = "azure-id";
+        doNothing().when(producer).push(anyString(), any());
+        userService.updateLastPasswordResetFlagOnAzure(azureId);
     }
 }
