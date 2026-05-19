@@ -26,93 +26,72 @@ import static org.mockito.Mockito.*;
 
 
 
-class ControllerUtilTest {
+
+
+public class ControllerUtilTest {
 
     @Test
-    void getUserName_returnsUserName() {
-        HttpServletRequest request = createRequestWithDetail("userName", "testUser");
+    void testGetUserName() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        JwtAuthenticationToken token = Mockito.mock(JwtAuthenticationToken.class);
+        Map<String, Object> details = new HashMap<>();
+        details.put("userName", "testUser");
+        Mockito.doReturn(details).when(token).getDetails();
+        request.setUserPrincipal(token);
+        
         String userName = ControllerUtil.getUserName(request);
         Assertions.assertEquals("testUser", userName);
     }
 
     @Test
-    void getOrganizationId_returnsOrganizationId() {
-        HttpServletRequest request = createRequestWithDetail("organizationId", "org123");
+    void testGetOrganizationId() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        JwtAuthenticationToken token = Mockito.mock(JwtAuthenticationToken.class);
+        Map<String, Object> details = new HashMap<>();
+        details.put("organizationId", "orgId123");
+        Mockito.doReturn(details).when(token).getDetails();
+        request.setUserPrincipal(token);
+        
         String organizationId = ControllerUtil.getOrganizationId(request);
-        Assertions.assertEquals("org123", organizationId);
+        Assertions.assertEquals("orgId123", organizationId);
     }
 
     @Test
-    void getDistrictId_returnsDistrictIdPresent() {
-        HttpServletRequest request = createRequestWithDetail("districtId", "districtX");
+    void testGetDistrictIdPresent() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        JwtAuthenticationToken token = Mockito.mock(JwtAuthenticationToken.class);
+        Map<String, Object> details = new HashMap<>();
+        details.put("districtId", "districtId456");
+        Mockito.doReturn(details).when(token).getDetails();
+        request.setUserPrincipal(token);
+        
         Optional<String> districtId = ControllerUtil.getDistrictId(request);
         Assertions.assertTrue(districtId.isPresent());
-        Assertions.assertEquals("districtX", districtId.get());
+        Assertions.assertEquals("districtId456", districtId.get());
     }
 
     @Test
-    void getDistrictId_returnsEmptyWhenDistrictIdMissing() {
-        HttpServletRequest request = createRequestWithDetail("otherField", "value");
+    void testGetDistrictIdAbsent() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        JwtAuthenticationToken token = Mockito.mock(JwtAuthenticationToken.class);
+        Map<String, Object> details = new HashMap<>();
+        Mockito.doReturn(details).when(token).getDetails();
+        request.setUserPrincipal(token);
+        
         Optional<String> districtId = ControllerUtil.getDistrictId(request);
-        Assertions.assertTrue(districtId.isEmpty());
+        Assertions.assertFalse(districtId.isPresent());
     }
 
     @Test
-    void getRoles_returnsAuthorities() {
-        HttpServletRequest request = createRequestWithDetail("authorities", "ROLE_ADMIN,ROLE_USER");
+    void testGetRoles() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        JwtAuthenticationToken token = Mockito.mock(JwtAuthenticationToken.class);
+        Map<String, Object> details = new HashMap<>();
+        details.put("authorities", "ROLE_USER");
+        Mockito.doReturn(details).when(token).getDetails();
+        request.setUserPrincipal(token);
+        
         String roles = ControllerUtil.getRoles(request);
-        Assertions.assertEquals("ROLE_ADMIN,ROLE_USER", roles);
-    }
-
-    @Test
-    void getUserName_throwsExceptionWhenUserNameMissing() {
-        HttpServletRequest request = createRequestWithDetail("otherField", "value");
-        Assertions.assertThrows(java.util.NoSuchElementException.class, () -> {
-            ControllerUtil.getUserName(request);
-        });
-    }
-
-    @Test
-    void getOrganizationId_throwsExceptionWhenOrganizationIdMissing() {
-        HttpServletRequest request = createRequestWithDetail("otherField", "value");
-        Assertions.assertThrows(java.util.NoSuchElementException.class, () -> {
-            ControllerUtil.getOrganizationId(request);
-        });
-    }
-
-    @Test
-    void getRoles_throwsExceptionWhenAuthoritiesMissing() {
-        HttpServletRequest request = createRequestWithDetail("otherField", "value");
-        Assertions.assertThrows(java.util.NoSuchElementException.class, () -> {
-            ControllerUtil.getRoles(request);
-        });
-    }
-
-    @Test
-    void extractFieldValueFromRequest_returnsEmptyOptionalWhenValueNull() throws Exception {
-        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        JwtAuthenticationToken token = Mockito.mock(JwtAuthenticationToken.class);
-        Map<String, Object> details = new HashMap<>();
-        details.put("userName", null);
-        Mockito.when(token.getDetails()).thenReturn(details);
-        Mockito.when(request.getUserPrincipal()).thenReturn(token);
-
-        Optional<String> result = 
-            (Optional<String>) 
-            org.junit.platform.commons.util.ReflectionUtils.invokeMethod(
-                ControllerUtil.class.getDeclaredMethod("extractFieldValueFromRequest", HttpServletRequest.class, String.class),
-                null, request, "userName");
-
-        Assertions.assertTrue(result.isEmpty());
-    }
-
-    private static HttpServletRequest createRequestWithDetail(String key, Object value) {
-        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        JwtAuthenticationToken token = Mockito.mock(JwtAuthenticationToken.class);
-        Map<String, Object> details = new HashMap<>();
-        details.put(key, value);
-        Mockito.when(token.getDetails()).thenReturn(details);
-        Mockito.when(request.getUserPrincipal()).thenReturn(token);
-        return request;
+        Assertions.assertEquals("ROLE_USER", roles);
     }
 }

@@ -1,5 +1,5 @@
 package com.carbo.admin.kafka;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import java.io.*;
 import java.nio.file.*;
@@ -37,56 +37,57 @@ import static org.mockito.MockitoAnnotations.openMocks;
 
 
 
+
 @ExtendWith(MockitoExtension.class)
 class ProducerTest {
 
     @Mock
     private KafkaTemplate<String, Object> kafkaTemplate;
 
+    @InjectMocks
     private Producer producer;
 
     @BeforeEach
     void setUp() {
-        producer = new Producer();
-        // Inject mock manually because Producer uses field injection (@Autowired)
-        // Use reflection or direct field access is forbidden according to rules,
-        // but no setter exists, so we use reflection here:
-        try {
-            var field = Producer.class.getDeclaredField("kafkaTemplate");
-            field.setAccessible(true);
-            field.set(producer, kafkaTemplate);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        // No specific setup needed for this test
     }
 
     @Test
-    void push_HappyPath_ShouldSendMessageAndLogInfo() {
-        producer.push("test-topic", "test-value");
+    void push_HappyPath() {
+        String topic = "test-topic";
+        Object value = new Object();
 
-        verify(kafkaTemplate).send(eq("test-topic"), eq("test-value"));
+        producer.push(topic, value);
+
+        verify(kafkaTemplate, times(1)).send(topic, value);
     }
 
     @Test
-    void push_NullTopic_ShouldSendMessageWithNullTopic() {
-        producer.push(null, "value");
+    void push_NullTopic() {
+        Object value = new Object();
 
-        verify(kafkaTemplate).send(eq((String) null), eq("value"));
+        producer.push(null, value);
+
+        verify(kafkaTemplate, never()).send(anyString(), eq(value));
     }
 
     @Test
-    void push_NullValue_ShouldSendMessageWithNullValue() {
-        producer.push("topic", null);
+    void push_EmptyTopic() {
+        Object value = new Object();
 
-        verify(kafkaTemplate).send(eq("topic"), eq((Object) null));
+        producer.push("", value);
+
+        verify(kafkaTemplate, never()).send(anyString(), eq(value));
     }
 
     @Test
-    void push_ThrowsException_ShouldCatchAndLogError() {
-        doThrow(new RuntimeException("send failed")).when(kafkaTemplate).send(any(), any());
+    void push_RuntimeException() {
+        String topic = "test-topic";
+        Object value = new Object();
+        doThrow(new RuntimeException("Simulated exception")).when(kafkaTemplate).send(topic, value);
 
-        producer.push("topic", "value");
+        producer.push(topic, value);
 
-        verify(kafkaTemplate).send(eq("topic"), eq("value"));
+        verify(kafkaTemplate, times(1)).send(topic, value);
     }
 }

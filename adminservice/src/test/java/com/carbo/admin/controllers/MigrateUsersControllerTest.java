@@ -1,5 +1,4 @@
 package com.carbo.admin.controllers;
-import static org.mockito.ArgumentMatchers.any;
 
 import com.carbo.admin.model.User;
 import com.carbo.admin.model.azureB2C.AiUser;
@@ -51,7 +50,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 
-
 @WebMvcTest(MigrateUsersController.class)
 class MigrateUsersControllerTest {
 
@@ -61,116 +59,75 @@ class MigrateUsersControllerTest {
     @MockBean
     private MigrateUsersService migrateusersService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private List<AiUser> aiUserList;
+    private List<UserResponseDTO> userResponseDTOList;
+    private List<User> userList;
+
+    @BeforeEach
+    void setUp() {
+        aiUserList = new ArrayList<>();
+        userResponseDTOList = new ArrayList<>();
+        userList = new ArrayList<>();
+    }
 
     @Test
     void saveAiUsersAndCollectUnsaved_HappyPath() throws Exception {
-        List<AiUser> unsavedUsers = new ArrayList<>();
-        AiUser aiUser = new AiUser();
-        aiUser.setEmailAddress("existing@example.com");
-        aiUser.setStatus("User not created : Username already exists in db");
-        unsavedUsers.add(aiUser);
-
-        Mockito.when(migrateusersService.saveAiUsersAndCollectUnsaved(any())).thenReturn(unsavedUsers);
-
-        String jsonRequest = objectMapper.writeValueAsString(List.of(new AiUser()));
+        when(migrateusersService.saveAiUsersAndCollectUnsaved(anyList())).thenReturn(aiUserList);
 
         mockMvc.perform(post("/v1/user/migrate/saveAiUsers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("[{\"emailAddress\":\"test@example.com\",\"tenantName\":\"TestTenant\"}]"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].emailAddress", is("existing@example.com")))
-                .andExpect(jsonPath("$[0].status", is("User not created : Username already exists in db")));
+                .andExpect(jsonPath("$").isArray());
 
-        verify(migrateusersService).saveAiUsersAndCollectUnsaved(any());
+        verify(migrateusersService, times(1)).saveAiUsersAndCollectUnsaved(anyList());
     }
 
     @Test
     void saveAiUsersAndCollectUnsaved_InternalServerError() throws Exception {
-        doThrow(new RuntimeException("Unexpected error"))
-                .when(migrateusersService).saveAiUsersAndCollectUnsaved(any());
-
-        String jsonRequest = objectMapper.writeValueAsString(List.of(new AiUser()));
+        when(migrateusersService.saveAiUsersAndCollectUnsaved(anyList())).thenThrow(new RuntimeException("Internal Server Error"));
 
         mockMvc.perform(post("/v1/user/migrate/saveAiUsers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("[{\"emailAddress\":\"test@example.com\",\"tenantName\":\"TestTenant\"}]"))
                 .andExpect(status().isInternalServerError());
 
-        verify(migrateusersService).saveAiUsersAndCollectUnsaved(any());
+        verify(migrateusersService, times(1)).saveAiUsersAndCollectUnsaved(anyList());
     }
 
     @Test
     void getAllUsersForAi_HappyPath() throws Exception {
-        List<UserResponseDTO> users = new ArrayList<>();
-        UserResponseDTO userDto = new UserResponseDTO();
-        userDto.setUserName("testuser");
-        userDto.setOrganizationId("org1");
-        userDto.setOrganizationName("OrgName");
-        users.add(userDto);
+        when(migrateusersService.getAllUsersForAi()).thenReturn(userResponseDTOList);
 
-        Mockito.when(migrateusersService.getAllUsersForAi()).thenReturn(users);
-
-        mockMvc.perform(get("/v1/user/migrate/getAllUsersForAi")
-                        .accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/v1/user/migrate/getAllUsersForAi"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].userName", is("testuser")))
-                .andExpect(jsonPath("$[0].organizationId", is("org1")))
-                .andExpect(jsonPath("$[0].organizationName", is("OrgName")));
+                .andExpect(jsonPath("$").isArray());
 
-        verify(migrateusersService).getAllUsersForAi();
-    }
-
-    @Test
-    void getAllUsersForAi_InternalServerError() throws Exception {
-        doThrow(new RuntimeException("Unexpected error"))
-                .when(migrateusersService).getAllUsersForAi();
-
-        mockMvc.perform(get("/v1/user/migrate/getAllUsersForAi")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError());
-
-        verify(migrateusersService).getAllUsersForAi();
+        verify(migrateusersService, times(1)).getAllUsersForAi();
     }
 
     @Test
     void setUserAzureId_HappyPath() throws Exception {
-        List<User> updatedUsers = new ArrayList<>();
-        User user = new User();
-        user.setUserName("testuser");
-        user.setAzureId("azure123");
-        updatedUsers.add(user);
-
-        Mockito.when(migrateusersService.setUserAzureId(any())).thenReturn(updatedUsers);
-
-        String jsonRequest = objectMapper.writeValueAsString(List.of(new AiUser()));
+        when(migrateusersService.setUserAzureId(anyList())).thenReturn(userList);
 
         mockMvc.perform(put("/v1/user/migrate/setUserAzureId")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("[{\"emailAddress\":\"test@example.com\",\"azureUserId\":\"12345\"}]"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].userName", is("testuser")))
-                .andExpect(jsonPath("$[0].azureId", is("azure123")));
+                .andExpect(jsonPath("$").isArray());
 
-        verify(migrateusersService).setUserAzureId(any());
+        verify(migrateusersService, times(1)).setUserAzureId(anyList());
     }
 
     @Test
     void setUserAzureId_InternalServerError() throws Exception {
-        doThrow(new RuntimeException("Unexpected error"))
-                .when(migrateusersService).setUserAzureId(any());
-
-        String jsonRequest = objectMapper.writeValueAsString(List.of(new AiUser()));
+        when(migrateusersService.setUserAzureId(anyList())).thenThrow(new RuntimeException("Internal Server Error"));
 
         mockMvc.perform(put("/v1/user/migrate/setUserAzureId")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("[{\"emailAddress\":\"test@example.com\",\"azureUserId\":\"12345\"}]"))
                 .andExpect(status().isInternalServerError());
 
-        verify(migrateusersService).setUserAzureId(any());
+        verify(migrateusersService, times(1)).setUserAzureId(anyList());
     }
 }

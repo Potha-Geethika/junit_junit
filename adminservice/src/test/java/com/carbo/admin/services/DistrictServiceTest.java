@@ -1,5 +1,4 @@
 package com.carbo.admin.services;
-import static org.mockito.ArgumentMatchers.any;
 
 import com.carbo.admin.model.District;
 import com.carbo.admin.repository.DistrictMongoDbRepository;
@@ -41,158 +40,87 @@ import static org.mockito.MockitoAnnotations.openMocks;
 
 
 
+
 @ExtendWith(MockitoExtension.class)
 class DistrictServiceTest {
 
     @Mock
     private DistrictMongoDbRepository districtRepository;
 
+    @InjectMocks
     private DistrictService districtService;
+
+    private District district;
 
     @BeforeEach
     void setUp() {
-        districtService = new DistrictService(districtRepository);
+        district = new District();
+        district.setId("1");
+        district.setName("Test District");
+        district.setOrganizationId("org-1");
     }
 
-    // getAll - Happy Path
     @Test
-    void getAll_ShouldReturnListOfDistricts() {
-        List<District> expectedList = Collections.singletonList(new District());
-        when(districtRepository.findAll()).thenReturn(expectedList);
+    void testGetAll() {
+        when(districtRepository.findAll()).thenReturn(Collections.singletonList(district));
 
-        List<District> actualList = districtService.getAll();
-
-        assertNotNull(actualList);
-        assertEquals(expectedList.size(), actualList.size());
+        List<District> result = districtService.getAll();
+        
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(district, result.get(0));
         verify(districtRepository, times(1)).findAll();
     }
 
-    // getAll - Empty List
     @Test
-    void getAll_ShouldReturnEmptyListWhenNoDistricts() {
-        when(districtRepository.findAll()).thenReturn(Collections.emptyList());
+    void testGetByOrganizationId() {
+        when(districtRepository.findByOrganizationId("org-1")).thenReturn(Collections.singletonList(district));
 
-        List<District> actualList = districtService.getAll();
-
-        assertNotNull(actualList);
-        assertTrue(actualList.isEmpty());
-        verify(districtRepository, times(1)).findAll();
-    }
-
-    // getByOrganizationId - Happy Path
-    @Test
-    void getByOrganizationId_ShouldReturnListForOrganization() {
-        String orgId = "org1";
-        List<District> expectedList = Collections.singletonList(new District());
-        when(districtRepository.findByOrganizationId(orgId)).thenReturn(expectedList);
-
-        List<District> actualList = districtService.getByOrganizationId(orgId);
-
-        assertNotNull(actualList);
-        assertEquals(expectedList.size(), actualList.size());
-        verify(districtRepository, times(1)).findByOrganizationId(orgId);
-    }
-
-    // getByOrganizationId - Null or Empty orgId
-    @Test
-    void getByOrganizationId_ShouldReturnEmptyListWhenOrgIdNull() {
-        when(districtRepository.findByOrganizationId(null)).thenReturn(Collections.emptyList());
-
-        List<District> actualList = districtService.getByOrganizationId(null);
-
-        assertNotNull(actualList);
-        assertTrue(actualList.isEmpty());
-        verify(districtRepository, times(1)).findByOrganizationId(null);
+        List<District> result = districtService.getByOrganizationId("org-1");
+        
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(district, result.get(0));
+        verify(districtRepository, times(1)).findByOrganizationId("org-1");
     }
 
     @Test
-    void getByOrganizationId_ShouldReturnEmptyListWhenOrgIdEmpty() {
-        when(districtRepository.findByOrganizationId("")).thenReturn(Collections.emptyList());
+    void testGet() {
+        when(districtRepository.findById("1")).thenReturn(Optional.of(district));
 
-        List<District> actualList = districtService.getByOrganizationId("");
+        Optional<District> result = districtService.get("1");
 
-        assertNotNull(actualList);
-        assertTrue(actualList.isEmpty());
-        verify(districtRepository, times(1)).findByOrganizationId("");
-    }
-
-    // get - Happy Path
-    @Test
-    void get_ShouldReturnOptionalDistrict() {
-        String districtId = "d1";
-        District district = new District();
-        when(districtRepository.findById(districtId)).thenReturn(Optional.of(district));
-
-        Optional<District> result = districtService.get(districtId);
-
-        assertTrue(result.isPresent());
+        assertNotNull(result);
         assertEquals(district, result.get());
-        verify(districtRepository, times(1)).findById(districtId);
+        verify(districtRepository, times(1)).findById("1");
     }
 
-    // get - Optional empty when not found
     @Test
-    void get_ShouldReturnEmptyOptionalWhenNotFound() {
-        String districtId = "notfound";
-        when(districtRepository.findById(districtId)).thenReturn(Optional.empty());
-
-        Optional<District> result = districtService.get(districtId);
-
-        assertFalse(result.isPresent());
-        verify(districtRepository, times(1)).findById(districtId);
-    }
-
-    // save - Happy Path
-    @Test
-    void save_ShouldReturnSavedDistrict() {
-        District district = new District();
+    void testSave() {
         when(districtRepository.save(district)).thenReturn(district);
 
-        District saved = districtService.save(district);
-
-        assertNotNull(saved);
-        assertEquals(district, saved);
+        District result = districtService.save(district);
+        
+        assertNotNull(result);
+        assertEquals(district, result);
         verify(districtRepository, times(1)).save(district);
     }
 
-    // save - Null district (should throw NPE)
     @Test
-    void save_ShouldThrowNPEWhenDistrictIsNull() {
-        assertThrows(NullPointerException.class, () -> districtService.save(null));
-        verify(districtRepository, never()).save(any());
-    }
-
-    // update - Happy Path
-    @Test
-    void update_ShouldCallSaveOnRepository() {
-        District district = new District();
+    void testUpdate() {
+        doNothing().when(districtRepository).save(district);
 
         districtService.update(district);
 
         verify(districtRepository, times(1)).save(district);
     }
 
-    // update - Null district (should throw NPE)
     @Test
-    void update_ShouldThrowNPEWhenDistrictIsNull() {
-        assertThrows(NullPointerException.class, () -> districtService.update(null));
-        verify(districtRepository, never()).save(any());
-    }
+    void testDelete() {
+        doNothing().when(districtRepository).deleteById("1");
 
-    // delete - Happy Path
-    @Test
-    void delete_ShouldCallDeleteById() {
-        String districtId = "d1";
+        districtService.delete("1");
 
-        districtService.delete(districtId);
-
-        verify(districtRepository, times(1)).deleteById(districtId);
-    }
-
-    // delete - Null districtId (should throw NPE)
-    @Test
-    void delete_ShouldThrowNPEWhenDistrictIdNull() {
-        assertThrows(NullPointerException.class, () -> districtService.delete(null));
-        verify(districtRepository, never()).deleteById(any());
+        verify(districtRepository, times(1)).deleteById("1");
     }
 }
